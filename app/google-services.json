@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "747057298653",
+    "project_id": "toindo2-91eb9",
+    "storage_bucket": "toindo2-91eb9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:747057298653:android:c2d03989f61098718e6f34",
+        "android_client_info": {
+          "package_name": "com.example.toindo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLsO9B1web6jYxXe3h7e6ofA3fSDz85_0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
