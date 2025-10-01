@@ -67,7 +67,7 @@ fun SplashScreen(
                 textAlign = TextAlign.Center
             )
             Text(
-                text="TôIndo",
+                text="Tô indo",
                 fontSize= 84.sp,
                 fontFamily = FontFamily(Font(resId= R.font.stash)),
                 fontStyle = FontStyle.Italic,
@@ -97,7 +97,7 @@ fun SplashScreen(
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .navigationBarsPadding()
-                    .padding(horizontal = 32.dp, vertical = 48.dp),
+                    .padding(horizontal = 24.dp, vertical = 48.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ){

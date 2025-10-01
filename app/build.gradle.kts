@@ -62,4 +62,10 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation("androidx.navigation:navigation-compose:2.8.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.3")
+    implementation(platform("com.google.firebase:firebase-bom:33.1.2")) // Use a versão mais recente
+
+    implementation("com.google.firebase:firebase-auth")
+
+    implementation("com.google.android.gms:play-services-auth:21.2.0") // Use a versão mais recente
+
 }

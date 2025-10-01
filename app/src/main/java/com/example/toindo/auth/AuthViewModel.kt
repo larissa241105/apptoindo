@@ -1,6 +1,9 @@
 package com.example.toindo.auth
 
+import android.content.Intent
+import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
@@ -8,63 +11,89 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+// 1. MUDANÇA AQUI: Trocamos 'isSuccess' por 'user'
 data class AuthUiState(
     val isLoading: Boolean = false,
-    val user: FirebaseUser? = FirebaseAuth.getInstance().currentUser,
-    val error: String? = null
+    val error: String? = null,
+    val user: FirebaseUser? = null
 )
 
-class AuthViewModel: ViewModel(){
+class AuthViewModel : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
     private val _state = MutableStateFlow(AuthUiState())
     val state: StateFlow<AuthUiState> = _state
 
-    fun signIn(email: String, password: String){
+    // 2. MUDANÇA AQUI: A função 'ok' agora armazena o usuário
+    private fun ok() {
+        _state.value = AuthUiState(user = auth.currentUser)
+    }
+
+    private fun fail(exception: Exception?) {
+        _state.value = AuthUiState(error = mapError(exception))
+    }
+
+    fun signIn(email: String, pass: String) {
         setLoading()
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task -> if (task.isSuccessful){
-                ok()
-            }else{
+        auth.signInWithEmailAndPassword(email, pass)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    ok()
+                } else {
                     fail(task.exception)
-            }
+                }
             }
     }
 
-
-    fun signUp(email: String, password: String){
+    fun signUp(email: String, pass: String) {
         setLoading()
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task -> if (task.isSuccessful){
-                ok()
-            }else{
-                fail(task.exception)
+        auth.createUserWithEmailAndPassword(email, pass)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    ok()
+                } else {
+                    fail(task.exception)
+                }
             }
-                fun signIn(email: String, password: String){
-                    setLoading()
-                    auth.signInWithEmailAndPassword(email, password)
-                        .addOnCompleteListener { task -> if (task.isSuccessful){
-                            ok()
-                        }else{
-                            fail(task.exception)
-                        }
-                        }
-                }       }
     }
 
-    fun signOut(){
+    fun firebaseAuthWithGoogle(idToken: String) {
+        setLoading()
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    ok()
+                } else {
+                    fail(task.exception)
+                }
+            }
+    }
+
+    fun signInWithGoogle(launcher: ActivityResultLauncher<Intent>, client: GoogleSignInClient) {
+        setLoading()
+        launcher.launch(client.signInIntent)
+    }
+
+    fun signOut(googleSignInClient: GoogleSignInClient) {
+        setLoading()
         auth.signOut()
-        _state.value = AuthUiState(user = null)
+        googleSignInClient.signOut().addOnCompleteListener {
+            resetState()
+        }
     }
 
-    private fun setLoading()
-    {_state.value = _state.value.copy(isLoading = true, error = null)}
-    private fun ok(){_state.value = _state.value.copy(isLoading = false, user=auth.currentUser, error=null)}
-    private fun fail(ex: Exception?){
-        _state.value=_state.value.copy(isLoading = false, user=null, error = mapError(ex))
+    // 3. MUDANÇA AQUI: 'resetState' limpa o usuário e o erro
+    fun resetState() {
+        _state.value = AuthUiState()
     }
+
+    private fun setLoading() {
+        _state.value = AuthUiState(isLoading = true)
+}
 
     private fun mapError(ex: Exception?): String {
         val e = ex ?: return "Authentication failed. Please try again."

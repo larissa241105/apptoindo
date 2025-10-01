@@ -12,7 +12,12 @@
           "package_name": "com.example.toindo"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "747057298653-7u09c6aedd2kiq96ehhf63ceccanecvd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDLsO9B1web6jYxXe3h7e6ofA3fSDz85_0"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "747057298653-7u09c6aedd2kiq96ehhf63ceccanecvd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
