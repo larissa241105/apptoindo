@@ -1,33 +1,41 @@
 {
   "project_info": {
-    "project_number": "747057298653",
-    "project_id": "toindo2-91eb9",
-    "storage_bucket": "toindo2-91eb9.firebasestorage.app"
+    "project_number": "890855759279",
+    "project_id": "appteste-ba927",
+    "storage_bucket": "appteste-ba927.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:747057298653:android:c2d03989f61098718e6f34",
+        "mobilesdk_app_id": "1:890855759279:android:bcdbb336d3fd179db3a35a",
         "android_client_info": {
-          "package_name": "com.example.toindo"
+          "package_name": "com.example.toindoapp"
         }
       },
       "oauth_client": [
         {
-          "client_id": "747057298653-7u09c6aedd2kiq96ehhf63ceccanecvd.apps.googleusercontent.com",
+          "client_id": "890855759279-rv50p26ie1idq5pofcmadn33h499kif5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.toindoapp",
+            "certificate_hash": "ce3d3567f0f448d349b98d28af660a91f4b655c1"
+          }
+        },
+        {
+          "client_id": "890855759279-3letu9o6mi7o0garr91rsm9b3vlhkpeh.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDLsO9B1web6jYxXe3h7e6ofA3fSDz85_0"
+          "current_key": "AIzaSyAllqyM9NqKKb4miYzrV2CIfi0DVbOcRGY"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "747057298653-7u09c6aedd2kiq96ehhf63ceccanecvd.apps.googleusercontent.com",
+              "client_id": "890855759279-3letu9o6mi7o0garr91rsm9b3vlhkpeh.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
