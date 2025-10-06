@@ -12,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -51,13 +52,17 @@ fun DetalhesEventoScreen(
         topBar = {
             TopAppBar(
                 title = { Text(uiState.evento?.nome ?: "Detalhes do Evento") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFFFFFFF) // Defina a cor de fundo aqui
+                ),
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Voltar")
                     }
                 }
             )
-        }
+        },
+        containerColor = Color(0xFFFFFFF)
     ) { innerPadding ->
         when (uiState.isLoading) {
             true -> Box(
@@ -115,8 +120,9 @@ fun DetalhesEventoScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 // Botão de Excluir
-                                Button(onClick = { vm.deleteEvento() }) {
+                                Button(onClick = { vm.deleteEvento() },  modifier = Modifier.fillMaxWidth()) {
                                     Text("Excluir Evento")
+
                                 }
 
                                 // Botão de Compartilhar
@@ -127,7 +133,11 @@ fun DetalhesEventoScreen(
                                         putExtra(Intent.EXTRA_TEXT, "Data: ${evento.data}\nLocal: ${evento.local}\n\n${vm.getShareableLink()}")
                                     }
                                     context.startActivity(Intent.createChooser(shareIntent, "Compartilhar via"))
-                                }) {
+                                },   modifier = Modifier.fillMaxWidth(),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(0xfffDF4A1B), // Exemplo: um azul
+                                        contentColor = Color.White
+                                    )) {
                                     Text("Compartilhar Link")
                                 }
                             }
@@ -140,7 +150,11 @@ fun DetalhesEventoScreen(
                                     putExtra(Intent.EXTRA_TEXT, "Data: ${evento.data}\nLocal: ${evento.local}\n\n${vm.getShareableLink()}")
                                 }
                                 context.startActivity(Intent.createChooser(shareIntent, "Compartilhar via"))
-                            }) {
+                            },   modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xfffDF4A1B), // Exemplo: um azul
+                                    contentColor = Color.White
+                                )) {
                                 Text("Compartilhar Link")
                             }
                         }

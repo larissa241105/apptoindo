@@ -12,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -29,8 +30,16 @@ fun ProcurarScreen(
 
     // O Scaffold define a estrutura da tela com TopBar, BottomBar e o conteúdo principal.
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Procurar Eventos") }) },
-        bottomBar = { BottomMenu(navController = navController) }
+        topBar = {
+            TopAppBar(
+                title = { Text("Procurar") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFFF0F0F0) // Defina a cor de fundo aqui
+                )
+            )
+        },
+        bottomBar = { BottomMenu(navController = navController) },
+        containerColor = Color(0xFFF0F0F0)
     ) { innerPadding ->
         Column(
             modifier = Modifier

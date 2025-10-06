@@ -17,6 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -41,25 +42,42 @@ fun EventosScreen(
     val uiState by vm.uiState.collectAsState()
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Eventos") }) },
+        containerColor = Color(0xFFFFFFF),
+        topBar = {
+            TopAppBar(
+                title = { Text("Eventos") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFFFFFFF) // Defina a cor de fundo aqui
+                )
+            )
+        },
         bottomBar = { BottomMenu(navController = navController) },
+
         floatingActionButton = {
-            FloatingActionButton(onClick = { navController.navigate(Screen.CadastroEvento.route) }) {
-                Icon(Icons.Default.Add, contentDescription = "Adicionar Evento")
+            FloatingActionButton(onClick = { navController.navigate(Screen.CadastroEvento.route) },
+                    containerColor = Color(0xfffDF4A1B)
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Adicionar Evento",
+                    tint = Color.White
+                )
             }
         }
+
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            TabRow(selectedTabIndex = uiState.selectedTab.ordinal) {
+            TabRow(
+                selectedTabIndex = uiState.selectedTab.ordinal,
+                containerColor = Color(0xFFFFFFF)) {
                 EventosTab.values().forEach { tab ->
                     Tab(
                         selected = uiState.selectedTab == tab,
                         onClick = { vm.onTabSelected(tab) },
-                        text = { Text(tab.title) }
+                        text = { Text(tab.title) },
+
                     )
                 }
             }
@@ -105,8 +123,13 @@ fun EventoCard(evento: Evento, onClick: () -> Unit) {
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        // Altere a cor de fundo do Card aqui
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFF0F0F0) // Exemplo: um cinza claro
+        )
     ) {
+
         Column {
 
             AsyncImage(
@@ -129,29 +152,30 @@ fun EventoCard(evento: Evento, onClick: () -> Unit) {
                 Text(
                     text = evento.nome,
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(imageVector = Icons.Outlined.DateRange, contentDescription = "Data", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(imageVector = Icons.Outlined.DateRange, contentDescription = "Data", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.tertiary)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "${evento.data} às ${evento.horario}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(text = "${evento.data} às ${evento.horario}", style = MaterialTheme.typography.bodyMedium, color = Color.Black)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(imageVector = Icons.Outlined.LocationOn, contentDescription = "Local", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(imageVector = Icons.Outlined.LocationOn, contentDescription = "Local", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.tertiary)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = evento.local, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(text = evento.local, style = MaterialTheme.typography.bodyMedium, color = Color.Black, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 // --- LINHAS ADICIONADAS PARA MOSTRAR O PREÇO ---
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(imageVector = Icons.Outlined.AttachMoney, contentDescription = "Preço", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(imageVector = Icons.Outlined.AttachMoney, contentDescription = "Preço", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.tertiary)
                     Spacer(modifier = Modifier.width(8.dp))
                     val precoTexto = if (evento.isGratuito || evento.preco == 0.0) {
                         "Gratuito"
                     } else {
-                        // Formata para o padrão R$ 0,00
+
                         String.format("R$ %.2f", evento.preco).replace('.', ',')
                     }
-                    Text(text = precoTexto, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(text = precoTexto, style = MaterialTheme.typography.bodyMedium, color = Color.Black)
                 }
             }
         }

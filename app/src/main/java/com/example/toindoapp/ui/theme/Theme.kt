@@ -13,24 +13,36 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 // ... (Seus esquemas de cores)
-private val DarkColorScheme = darkColorScheme(/*...*/)
-private val LightColorScheme = lightColorScheme(/*...*/)
+private val DarkColorScheme = darkColorScheme(
+    primary = roxo,
+    secondary = cinzaclaro,
+    tertiary = laranja
+)
+
+private val LightColorScheme = lightColorScheme(
+    primary = roxo,
+    secondary = cinzaclaro,
+    tertiary = laranja,
+
+)
 
 
 @Composable
 fun ToindoTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    // Defina darkTheme diretamente como false para forçar o tema claro
+    darkTheme: Boolean = false,
     content: @Composable () -> Unit
 ) {
+    // Note que a variável 'darkTheme' acima já foi definida como 'false'
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            // Deixa a barra de status transparente para o app desenhar por baixo
+            // Ajuste para deixar a barra de status transparente
             window.statusBarColor = Color.Transparent.toArgb()
-            // Garante que os ícones da barra (hora, bateria) fiquem escuros e visíveis
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            // Garante que os ícones da barra (hora, bateria) fiquem ESCUROS no tema claro
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true
         }
     }
 

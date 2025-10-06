@@ -3,6 +3,7 @@ package com.example.toindoapp.telas
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -31,7 +32,7 @@ fun BottomMenu(navController: NavController) {
 
     NavigationBar(
 
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = Color(0xFFFF2F5F2),
 
         tonalElevation = 1.dp
     ) {

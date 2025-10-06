@@ -19,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -73,6 +74,7 @@ fun CadastroEventoScreen(
     }
 
     Scaffold(
+        containerColor = Color(0xFFFFFFF),
         topBar = {
             TopAppBar(
                 title = { Text("Cadastrar Novo Evento") },
@@ -80,7 +82,10 @@ fun CadastroEventoScreen(
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFFFFFFF) // Defina a cor de fundo aqui
+                )
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
@@ -291,6 +296,7 @@ fun TimePickerDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Surface(
+
             shape = MaterialTheme.shapes.extraLarge,
             tonalElevation = 6.dp,
             modifier = Modifier

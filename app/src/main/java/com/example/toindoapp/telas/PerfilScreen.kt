@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter // <<< 1. IMPORTE AQUI
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +45,7 @@ fun PerfilScreen(
     }
 
     Scaffold(
+        containerColor = Color(0xFFFffff),
         topBar = {
             TopAppBar(
                 title = { Text("Meu Perfil") },
@@ -51,7 +53,9 @@ fun PerfilScreen(
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar")
                     }
-                }
+                },colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFFFFFFF) // Defina a cor de fundo aqui
+                )
             )
         }
     ) { innerPadding ->
