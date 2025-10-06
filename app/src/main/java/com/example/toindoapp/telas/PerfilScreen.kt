@@ -93,13 +93,15 @@ fun PerfilScreen(
                 Text(
                     text = uiState.nome,
                     fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color =Color(0x00000)
                 )
+
 
                 Text(
                     text = uiState.email,
                     fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color =Color(0x00000)
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
