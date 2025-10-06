@@ -83,7 +83,7 @@ class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
     // --- Lógica de Compartilhamento (exemplo simples) ---
     fun getShareableLink(): String {
         // Isso é um placeholder. A URL real dependeria de um link dinâmico do Firebase.
-        return "https://seusite.com/eventos/$eventoId"
+        return "https://site.com/$eventoId"
     }
 
     class Factory(private val eventoId: String) : ViewModelProvider.Factory {

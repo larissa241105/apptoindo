@@ -127,7 +127,7 @@ fun AppNav(vm: AuthViewModel = viewModel()) {
 
         // Exemplo: convites, se implementado
         composable(Screen.Convites.route) {
-            Text("Tela de Convites")
+            ConvitesScreen(navController = nav)
         }
 
         // --- Rota da Tela de Detalhes do Evento com Argumento ---
