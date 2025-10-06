@@ -12,6 +12,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.UserProfileChangeRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -48,12 +49,30 @@ class AuthViewModel : ViewModel() {
             }
     }
 
-    fun signUp(email: String, pass: String) {
+    fun signUp(email: String, pass: String, name: String) {
         setLoading()
         auth.createUserWithEmailAndPassword(email, pass)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    ok()
+                    val user = auth.currentUser
+                    if (user != null) {
+                        val profileUpdates = UserProfileChangeRequest.Builder()
+                            .setDisplayName(name)
+                            .build()
+                        user.updateProfile(profileUpdates)
+                            .addOnCompleteListener { profileTask ->
+                                if (profileTask.isSuccessful) {
+                                    // Perfil atualizado com sucesso
+                                    ok()
+                                } else {
+                                    // Ocorreu um erro ao atualizar o perfil
+                                    fail(profileTask.exception)
+                                }
+                            }
+                    } else {
+                        // Não há usuário para atualizar
+                        ok()
+                    }
                 } else {
                     fail(task.exception)
                 }

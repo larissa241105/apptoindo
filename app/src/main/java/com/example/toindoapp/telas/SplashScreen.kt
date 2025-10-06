@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.sp
 import com.example.toindoapp.R
 
 //private val Arrangement.CenterVertically: Arrangement.Horizontal
-private val FutureRed = Color(color=0xfff33f4c)
+private val FutureRed = Color(color=0xfffDF4A1B)
 @Composable
 fun SplashScreen(
     onLogin: () ->  Unit =  {},
@@ -46,6 +46,7 @@ fun SplashScreen(
     Box(
         modifier = Modifier.
         fillMaxSize()
+
     ){
         Column(modifier = Modifier.
         fillMaxSize()
@@ -85,7 +86,7 @@ fun SplashScreen(
             .align ( Alignment.BottomCenter ))
         {
             Image(
-                painter=painterResource(R.drawable.wavy_bg),
+                painter=painterResource(R.drawable.wavy3),
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -128,7 +129,7 @@ fun SplashScreen(
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = Color.White
                     ),
-                    border = BorderStroke(2.dp, Color.White)
+                 border = BorderStroke(2.dp, Color.White)
                 ) {
                     Text(
                         text = "Cadastre-se",

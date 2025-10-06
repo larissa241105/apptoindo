@@ -4,6 +4,7 @@ import Evento // Certifique-se de que a importação do seu modelo de dados est�
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,6 +32,7 @@ sealed interface SaveState {
     object Loading : SaveState
     object Success : SaveState
     data class Error(val message: String) : SaveState
+
 }
 
 class CadastroEventoViewModel : ViewModel() {
@@ -55,6 +57,12 @@ class CadastroEventoViewModel : ViewModel() {
     fun salvarEvento() {
         if (_saveState.value is SaveState.Loading) return
 
+        val userId = Firebase.auth.currentUser?.uid
+        if (userId == null) {
+            // Se não houver usuário logado, não podemos salvar. Mostra um erro.
+            _saveState.value = SaveState.Error("Você precisa estar logado para criar um evento.")
+            return
+        }
         val estadoAtual = _uiState.value
         if (estadoAtual.nome.isBlank() || estadoAtual.data.isBlank() || estadoAtual.local.isBlank()) {
             _saveState.value = SaveState.Error("Nome, data e local são obrigatórios.")
@@ -76,7 +84,8 @@ class CadastroEventoViewModel : ViewModel() {
                         isGratuito = estadoAtual.isGratuito,
                         categoria = estadoAtual.categoria,
                         isPublico = estadoAtual.isPublico,
-                        imagemUrl = null
+                        imagemUrl = null,
+                        creatorId = userId // <-- SALVANDO O ID DO USUÁRIO
                     )
 
                     println("DEBUG: [2] Objeto Evento criado. Tentando enviar para o Firestore.")

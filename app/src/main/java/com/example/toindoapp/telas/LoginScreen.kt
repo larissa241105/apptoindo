@@ -1,6 +1,7 @@
 package com.example.toindoapp.telas
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,13 +42,11 @@ import com.example.toindoapp.R
 
 fun LoginScreen(
     onEmailClick:()->Unit={},
-    onNumberClick:()->Unit={},
     onGoogleClick:()->Unit={},
     onSignupClick:()->Unit={},
 ){
-    val emailColor = Color(0xffff6a2e)
-    val numberClick = Color(0xff9C27b0)
-    val googleColor = Color(0xffe53935)
+    val emailColor = Color(0xfffDF4A1B)
+    val googleColor = Color(0xff9C27b0)
 
     Box(
         modifier = Modifier
@@ -77,8 +76,8 @@ fun LoginScreen(
                 Spacer(Modifier.height(8.dp))
 
                 Text(
-                    text = "Login Tôindo",
-                    fontSize = 24.sp,
+                    text = "Login",
+                    fontSize = 36.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(top=24.dp, bottom = 36.dp)
@@ -93,14 +92,6 @@ fun LoginScreen(
                 Spacer(Modifier.height(24.dp))
 
                 LoadingIconButton(
-                    text = "Continue com Telefone",
-                    iconRes = R.drawable.phone,
-                    container = numberClick,
-                    onClick = onNumberClick
-                )
-                Spacer(Modifier.height(24.dp))
-
-                LoadingIconButton(
                     text = "Continue com Google",
                     iconRes = R.drawable.google,
                     container = googleColor,
@@ -110,38 +101,31 @@ fun LoginScreen(
                 Spacer(Modifier.weight(1f))
             }
 
-            val annotated = buildAnnotatedString {
-                append ("Novo usuário?")
-                pushStringAnnotation(tag="signup", annotation = "signup")
-                withStyle(
-                    SpanStyle(
-                        color=Color(0xffff6a2e),
-                    fontWeight = FontWeight.Bold
-                    )){
-                    append(" Cadastre-se")
-                }
-                pop()
+        val annotatedText = buildAnnotatedString {
+            append("Novo usuário?")
+
+            // Anote o texto "Cadastre-se" para que seja clicável
+            pushStringAnnotation(tag = "signup", annotation = "signup_link")
+            withStyle(style = SpanStyle(
+                color = Color(0xffff6a2e),
+                fontWeight = FontWeight.Bold)
+            ) {
+                append(" Cadastre-se")
             }
-            ClickableText(
-                text = annotated,
-                onClick = {offset ->
-                    annotated.getStringAnnotations(
-                        tag="signup",
-                        start = offset,
-                        end = offset
-                    ).firstOrNull()?.let{
-                        onSignupClick
-                    }
-                },
-                modifier = Modifier.align(Alignment.BottomCenter)
-                    .padding(bottom=24.dp)
-            )
+            pop()
+        }
+
+        Text(
+            text = annotatedText,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 24.dp)
+                .clickable {
+                  onSignupClick()
+                }
+        )
         }
     }
-
-
-
-
 
 
 @Composable
@@ -177,8 +161,8 @@ private fun LoadingIconButton(
     }
 }
 
-@Composable
-@Preview (showBackground = true, backgroundColor = 0xffffff)
-private fun LoginScreenPreview(){
-    MaterialTheme { LoginScreen() }
-}
+
+
+
+
+

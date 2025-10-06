@@ -23,7 +23,7 @@ fun BottomMenu(navController: NavController) {
         BottomNavItem("Evento", Screen.Eventos.route, R.drawable.ic_celebration_filled, R.drawable.ic_celebration_outlined),
         BottomNavItem("Procurar", Screen.Procurar.route, R.drawable.ic_search_filled, R.drawable.ic_search_outlined),
         BottomNavItem("Convites", Screen.Convites.route, R.drawable.ic_mail_filled, R.drawable.ic_mail_outlined),
-        BottomNavItem("Perfil", Screen.Profile.route, R.drawable.ic_person_filled, R.drawable.ic_person_outlined)
+        BottomNavItem("Perfil", Screen.Perfil.route, R.drawable.ic_person_filled, R.drawable.ic_person_outlined)
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
