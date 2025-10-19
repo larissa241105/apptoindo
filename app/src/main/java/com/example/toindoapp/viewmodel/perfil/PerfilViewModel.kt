@@ -15,7 +15,8 @@ data class PerfilUiState(
     val nome: String = "",
     val email: String = "",
     val fotoUrl: String? = null,
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val userUid : String = ""
 )
 
 class PerfilViewModel : ViewModel() {
@@ -39,7 +40,8 @@ class PerfilViewModel : ViewModel() {
                     nome = currentUser.displayName ?: "Nome não informado",
                     email = currentUser.email ?: "E-mail não informado",
                     fotoUrl = currentUser.photoUrl?.toString(),
-                    isLoading = false
+                    isLoading = false,
+                    userUid = currentUser.uid
                 )
             }
         } else {

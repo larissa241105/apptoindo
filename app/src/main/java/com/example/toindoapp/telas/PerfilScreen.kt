@@ -16,6 +16,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter // <<< 1. IMPORTE AQUI
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import com.example.toindoapp.R
 import androidx.compose.ui.unit.dp
@@ -94,15 +96,26 @@ fun PerfilScreen(
                     text = uiState.nome,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color =Color(0x00000)
+                    color =MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
 
                 Text(
                     text = uiState.email,
                     fontSize = 16.sp,
-                    color =Color(0x00000)
+                    color =MaterialTheme.colorScheme.onSurfaceVariant
                 )
+
+                //ADICIONADO: mostrar e copiar uid
+
+                Text(
+                    text = uiState.userUid,
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                CopyButtonExample(textToCopy = uiState.userUid )
+
 
                 Spacer(modifier = Modifier.weight(1f))
 
@@ -114,6 +127,22 @@ fun PerfilScreen(
                     Text("SAIR (LOGOUT)")
                 }
             }
+        }
+    }
+}
+
+//butao para copiar uid
+@Composable
+private fun CopyButtonExample(textToCopy: String) {
+    val clipboardManager = LocalClipboardManager.current
+
+    Column {
+        Button(
+            onClick = {
+                clipboardManager.setText(AnnotatedString(textToCopy))
+            }
+        ) {
+            Text("Clique aqui para copiar seu UID")
         }
     }
 }
