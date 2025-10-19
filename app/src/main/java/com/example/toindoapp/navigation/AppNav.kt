@@ -28,6 +28,7 @@ import com.example.toindoapp.telas.CadastroEventoScreen
 import com.example.toindoapp.telas.DetalhesEventoScreen
 
 import com.example.toindoapp.telas.LoginScreen
+import com.example.toindoapp.telas.ParticipantesScreen
 import com.example.toindoapp.telas.ProcurarScreen
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -143,6 +144,25 @@ fun AppNav(vm: AuthViewModel = viewModel()) {
             } else {
                 // Caso o ID do evento seja nulo, volta para a tela de eventos
                 nav.popBackStack()
+            }
+        }
+
+        composable(
+            route = "participantes_screen/{eventoId}/{creatorId}", // Rota atualizada
+            arguments = listOf(
+                navArgument("eventoId") { type = NavType.StringType },
+                navArgument("creatorId") { type = NavType.StringType } // Novo argumento
+            )
+        ) { backStackEntry ->
+            val eventoId = backStackEntry.arguments?.getString("eventoId")
+            val creatorId = backStackEntry.arguments?.getString("creatorId") // Pega o novo argumento
+
+            if (eventoId != null && creatorId != null) {
+                ParticipantesScreen(
+                    navController = nav,
+                    eventoId = eventoId,
+                    creatorId = creatorId // Passa para a tela
+                )
             }
         }
 

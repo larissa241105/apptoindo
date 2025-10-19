@@ -9,6 +9,7 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.example.toindoapp.data.eventos.Convite
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -18,17 +19,21 @@ enum class EventoActionState { IDLE, DELETED }
 
 data class DetalhesEventoUiState(
     val isLoading: Boolean = true,
+    val isSendingInvite: Boolean = false, // Novo: para o feedback do botão de convite
     val evento: Evento? = null,
     val isUserCreator: Boolean = false,
     val error: String? = null,
-    val actionState: EventoActionState = EventoActionState.IDLE, // Novo estado de ação
-    //val participants: List<String> = listOf()
+    val actionState: EventoActionState = EventoActionState.IDLE
 )
 
 class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DetalhesEventoUiState())
     val uiState = _uiState.asStateFlow()
+
+    // StateFlow separado para mensagens de status (Snackbar)
+    private val _conviteStatus = MutableStateFlow<String?>(null)
+    val conviteStatus = _conviteStatus.asStateFlow()
 
     init {
         fetchEvento()
@@ -44,50 +49,88 @@ class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
                     .await()
 
                 val evento = document.toObject(Evento::class.java)?.copy(id = document.id)
-
                 val userId = Firebase.auth.currentUser?.uid
                 val isCreator = (userId != null && evento?.creatorId == userId)
 
                 _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        evento = evento,
-                        isUserCreator = isCreator
-                    )
+                    it.copy(isLoading = false, evento = evento, isUserCreator = isCreator)
                 }
-
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
         }
     }
 
-    // --- Nova lógica de exclusão ---
-    fun deleteEvento() {
+    // --- LÓGICA DE CONVITE ---
+    fun enviarConvite(convidadoUid: String) {
         viewModelScope.launch {
-            try {
-                // Remove o documento do Firestore
-                Firebase.firestore.collection("eventos")
-                    .document(eventoId)
-                    .delete()
-                    .await()
+            // Validações iniciais
+            val eventoAtual = _uiState.value.evento
+            val usuarioAtual = Firebase.auth.currentUser
+            if (eventoAtual == null || usuarioAtual == null) {
+                _conviteStatus.value = "Erro: Dados do evento ou usuário indisponíveis."
+                return@launch
+            }
+            if (convidadoUid.isBlank()) {
+                _conviteStatus.value = "Por favor, insira um UID."
+                return@launch
+            }
+            if (convidadoUid == usuarioAtual.uid) {
+                _conviteStatus.value = "Você não pode convidar a si mesmo."
+                return@launch
+            }
 
-                // Atualiza o estado para informar a UI que a exclusão foi bem-sucedida
-                _uiState.update { it.copy(actionState = EventoActionState.DELETED) }
+            // Inicia o estado de carregamento
+            _uiState.update { it.copy(isSendingInvite = true) }
+
+            try {
+                // Cria o objeto do convite
+                val novoConvite = Convite(
+                    nomeDoEvento = eventoAtual.nome, // Supondo que seu Evento tem um campo 'name'
+                    quemConvidou = usuarioAtual.displayName ?: "Criador do Evento",
+                    convidadoUid = convidadoUid.trim(), // Remove espaços em branco
+                    eventoId = eventoId,
+                    status = "PENDENTE"
+                )
+
+                // Salva o novo documento na coleção "convites"
+                Firebase.firestore.collection("convites").add(novoConvite).await()
+
+                // Atualiza o status com sucesso
+                _conviteStatus.value = "Convite enviado com sucesso!"
+
             } catch (e: Exception) {
-                // Lida com erros
-                _uiState.update { it.copy(error = "Falha ao excluir o evento: ${e.message}") }
+                // Atualiza o status com erro
+                _conviteStatus.value = "Falha ao enviar convite: ${e.message}"
+            } finally {
+                // Finaliza o estado de carregamento
+                _uiState.update { it.copy(isSendingInvite = false) }
             }
         }
     }
 
-
-    // --- Lógica de Compartilhamento (exemplo simples) ---
-    fun getShareableLink(): String {
-        // Isso é um placeholder. A URL real dependeria de um link dinâmico do Firebase.
-        return "https://site.com/$eventoId"
+    /**
+     * Limpa a mensagem de status para que o Snackbar não apareça novamente.
+     */
+    fun clearConviteStatus() {
+        _conviteStatus.value = null
     }
 
+
+    // --- LÓGICA DE EXCLUSÃO ---
+    fun deleteEvento() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) } // re-usando o isLoading geral
+            try {
+                Firebase.firestore.collection("eventos").document(eventoId).delete().await()
+                _uiState.update { it.copy(actionState = EventoActionState.DELETED, isLoading = false) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = "Falha ao excluir o evento: ${e.message}", isLoading = false) }
+            }
+        }
+    }
+
+    // --- Factory para instanciar a ViewModel com eventoId ---
     class Factory(private val eventoId: String) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(DetalhesEventoViewModel::class.java)) {
@@ -97,22 +140,4 @@ class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
             throw IllegalArgumentException("Unknown ViewModel class")
         }
     }
-
-/*
-    fun adicionaParticipante(convidado:String){
-
-        val participants = Evento(participants = listOf(convidado)
-
-        viewModelScope.launch {
-            try {
-                Firebase.firestore.collection("eventos")
-                    .document(eventoId)
-                    .update("participants",participants)
-
-            } catch (e: Exception) {
-            }
-        }
-    }
-*/
-
 }
