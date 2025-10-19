@@ -24,6 +24,7 @@ data class CadastroEventoUiState(
     val categoria: String = "",
     val imagemUri: String? = null,
     val isPublico: Boolean = true
+    //val participants: List<String> = emptyList()
 )
 
 // Estado do processo de salvamento (sem alterações)
@@ -84,8 +85,8 @@ class CadastroEventoViewModel : ViewModel() {
                         isGratuito = estadoAtual.isGratuito,
                         categoria = estadoAtual.categoria,
                         isPublico = estadoAtual.isPublico,
-                        imagemUrl = null,
                         creatorId = userId // <-- SALVANDO O ID DO USUÁRIO
+                        //participants = listOf()
                     )
 
                     println("DEBUG: [2] Objeto Evento criado. Tentando enviar para o Firestore.")

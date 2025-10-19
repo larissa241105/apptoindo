@@ -14,7 +14,8 @@ data class Evento(
     val isPublico: Boolean = true,
     val imagemUrl: String? = null, // URL da imagem no Firebase Storage,
     val creatorId: String = "", // <-- CAMPO ADICIONADO,
+    //val participants: List<String> = listOf(), // campo adicionado
+    //val participantLimit: Int?=null, //campo adicionado
     @ServerTimestamp
     val criadoEm: Date? = null, // Data de criação automática pelo Firestore
-    // val criadorId: String = "" // Opcional: ID do usuário que criou o evento
 )

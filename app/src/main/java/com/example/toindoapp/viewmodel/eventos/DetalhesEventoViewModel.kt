@@ -4,7 +4,6 @@ import Evento
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
@@ -22,7 +21,8 @@ data class DetalhesEventoUiState(
     val evento: Evento? = null,
     val isUserCreator: Boolean = false,
     val error: String? = null,
-    val actionState: EventoActionState = EventoActionState.IDLE // Novo estado de ação
+    val actionState: EventoActionState = EventoActionState.IDLE, // Novo estado de ação
+    //val participants: List<String> = listOf()
 )
 
 class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
@@ -48,11 +48,13 @@ class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
                 val userId = Firebase.auth.currentUser?.uid
                 val isCreator = (userId != null && evento?.creatorId == userId)
 
-                _uiState.update { it.copy(
-                    isLoading = false,
-                    evento = evento,
-                    isUserCreator = isCreator
-                ) }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        evento = evento,
+                        isUserCreator = isCreator
+                    )
+                }
 
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
@@ -95,4 +97,22 @@ class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
             throw IllegalArgumentException("Unknown ViewModel class")
         }
     }
+
+/*
+    fun adicionaParticipante(convidado:String){
+
+        val participants = Evento(participants = listOf(convidado)
+
+        viewModelScope.launch {
+            try {
+                Firebase.firestore.collection("eventos")
+                    .document(eventoId)
+                    .update("participants",participants)
+
+            } catch (e: Exception) {
+            }
+        }
+    }
+*/
+
 }

@@ -10,6 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,6 +38,7 @@ fun DetalhesEventoScreen(
 ) {
     val uiState by vm.uiState.collectAsState()
     val context = LocalContext.current
+    var convidado by remember { mutableStateOf("") }
 
     // Observe o estado de ação para navegar de volta após a exclusão
     LaunchedEffect(uiState.actionState) {
@@ -119,6 +123,21 @@ fun DetalhesEventoScreen(
                                 verticalArrangement = Arrangement.SpaceEvenly,
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
+
+                                Text("UID do seu amigo:")
+                                Spacer(modifier = Modifier.height(2.dp))
+
+                                OutlinedTextField(
+                                    value = convidado,
+                                    onValueChange = {convidado = it},
+                                    label = {Text("Insira aqui")},
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                Button(onClick = { /*vm.adicionaParticipante(convidado) */ },
+                                    modifier = Modifier.fillMaxWidth()) {
+                                    Text("Enviar convite")
+                                }
+
                                 // Botão de Excluir
                                 Button(onClick = { vm.deleteEvento() },  modifier = Modifier.fillMaxWidth()) {
                                     Text("Excluir Evento")
