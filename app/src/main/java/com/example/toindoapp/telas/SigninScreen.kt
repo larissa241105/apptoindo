@@ -232,7 +232,11 @@ fun SignInScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp)) {
-            Text("Entrar", fontWeight = FontWeight.Bold)
+            Text(
+                text = "Entrar",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
         Spacer(Modifier.weight(1f))
 

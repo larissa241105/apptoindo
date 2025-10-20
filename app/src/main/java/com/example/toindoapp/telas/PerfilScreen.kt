@@ -1,10 +1,12 @@
 package com.example.toindoapp.telas // Ajuste o pacote se necessário
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -78,18 +80,23 @@ fun PerfilScreen(
                 val placeholderPainter = rememberVectorPainter(image = Icons.Default.AccountCircle)
 
                 // Foto do Perfil
-                GlideImage(
-                    model = uiState.fotoUrl,
-                    contentDescription = "Foto do Perfil",
+                Box(
+                    // Este modifier cria o círculo de fundo cinza
                     modifier = Modifier
-                        .size(120.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop,
+                        .size(72.dp) // O tamanho total do círculo
+                        .background(
+                            color = Color.LightGray, // A cor de fundo que você quer
+                            shape = CircleShape      // A forma do fundo
+                        ),
+                    contentAlignment = Alignment.Center // Centraliza o ícone dentro do Box
                 ) {
-                    // <<< 3. USE A VARIÁVEL AQUI
-                    it.fallback(R.drawable.placeholder_image)
-                        .error(R.drawable.placeholder_image)
-                        .placeholder(R.drawable.placeholder_image) // Boa prática adicionar placeholder também
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Ícone do Perfil",
+                        // O ícone é um pouco menor que o Box para criar a margem
+                        modifier = Modifier.size(48.dp),
+                        tint = Color.White // Cor do ícone para contrastar com o fundo
+                    )
                 }
 
                 Text(

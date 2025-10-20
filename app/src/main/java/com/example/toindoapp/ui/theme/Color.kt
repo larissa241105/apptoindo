@@ -2,7 +2,7 @@ package com.example.toindoapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val background = Color(0xFFFFFFFF)
+val background1 = Color(0xFFDF4A1B)
 val  cinzaclaro = Color(0xFFF0F0F0)
 
 

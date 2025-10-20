@@ -69,7 +69,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.3")
     implementation(platform("com.google.firebase:firebase-bom:33.1.2")) // Use a versão mais recente
     implementation("androidx.activity:activity-ktx:1.9.0")
-
+    implementation("com.google.maps.android:maps-compose:2.11.4") // Verifique a versão mais recente
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.2")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.github.bumptech.glide:compose:1.0.0-beta01")

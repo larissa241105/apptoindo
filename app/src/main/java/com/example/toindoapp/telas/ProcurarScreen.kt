@@ -1,10 +1,10 @@
 package com.example.toindoapp.telas
-
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -16,9 +16,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.toindoapp.viewmodel.eventos.EventoCategoria
 import com.example.toindoapp.viewmodel.eventos.ProcurarViewModel
-
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.rememberCameraPositionState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,92 +30,73 @@ fun ProcurarScreen(
 ) {
     val uiState by vm.uiState.collectAsState()
 
-    // O Scaffold define a estrutura da tela com TopBar, BottomBar e o conteúdo principal.
+    val localizacaoInicial = LatLng(-3.1190, -60.0217)
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(localizacaoInicial, 12f)
+    }
+
+    // O Scaffold volta a ser o componente principal para organizar a tela
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Procurar") },
+                title = { Text("Procurar") }, // Alterei o título para "Procurar"
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFF0F0F0) // Defina a cor de fundo aqui
-                )
+                    containerColor = Color(0xFFFFFFFF) // Cor de fundo branca
+                ),
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Voltar")
+                    }
+                }
             )
         },
-        bottomBar = { BottomMenu(navController = navController) },
-        containerColor = Color(0xFFF0F0F0)
+        bottomBar = {
+            // Supondo que você tenha um Composable chamado BottomMenu
+            BottomMenu(navController = navController)
+        }
     ) { innerPadding ->
-        Column(
+        // O Box agora fica dentro do Scaffold e usa o innerPadding
+        Box(
             modifier = Modifier
-                .padding(innerPadding) // Aplica o padding do Scaffold para o conteúdo não ser coberto pelo menu
                 .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(innerPadding) // Aplica o padding para não sobrepor as barras
         ) {
-            // Adiciona um Spacer para empurrar a barra de pesquisa para baixo
-            Spacer(modifier = Modifier.height(16.dp))
+            // 1. O Mapa ocupa todo o espaço no fundo
+            GoogleMap(
+                modifier = Modifier.fillMaxSize(),
+                cameraPositionState = cameraPositionState
+            ) {
+                // Conteúdo do mapa vazio
+            }
 
-            // Barra de Pesquisa
+            // 2. A Barra de Pesquisa fica sobre o mapa
             OutlinedTextField(
                 value = uiState.searchText,
                 onValueChange = { vm.onSearchTextChange(it) },
                 placeholder = { Text("Pesquisar eventos...") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Pesquisar") },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Pesquisar",
+                        // 1. Cor do ícone alterada aqui
+                        tint = Color(0xFFDF4A1B)
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                singleLine = true
+                    .padding(16.dp)
+                    .align(Alignment.TopCenter),
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White,
+                    // 2. Cor da linha/borda alterada aqui
+                    focusedBorderColor = Color(0xFFDF4A1B),
+                    unfocusedBorderColor = Color(0xFFDF4A1B) // Opcional: mesma cor para a borda não focada
+                )
             )
-
-            // Chips de Filtro
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(bottom = 16.dp)
-            ) {
-                items(EventoCategoria.values()) { category ->
-                    FilterChip(
-                        selected = uiState.selectedCategories.contains(category),
-                        onClick = { vm.onCategorySelected(category) },
-                        label = { Text(category.title) }
-                    )
-                }
-            }
-
-            // Exibição dos eventos (Carregando, Vazio ou Lista)
-            when {
-                uiState.isLoading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
-                uiState.eventos.isEmpty() -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("Nenhum evento encontrado.")
-                    }
-                }
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        contentPadding = PaddingValues(vertical = 8.dp)
-                    ) {
-                        items(uiState.eventos) { evento ->
-                            EventoCard(
-                                evento = evento,
-                                onClick = {
-                                    // Esta linha é a responsável por iniciar a navegação
-                                    navController.navigate("detalhes_evento/${evento.id}")
-                                }
-                            )
-                        }
-                    }
-                }
-            }
         }
     }
 }
+
+// **Lembre-se de ter o seu Composable BottomMenu definido em algum lugar, por exemplo:**

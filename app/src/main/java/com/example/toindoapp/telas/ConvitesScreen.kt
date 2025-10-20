@@ -29,7 +29,7 @@ fun ConvitesScreen(
     val listaDeConvites = vm.convites.value
 
     Scaffold(
-        containerColor = Color(0xFFFFFFF),
+        containerColor = Color(0xFFFFFFFF),
         topBar = {
             TopAppBar(
                 title = { Text("Meus Convites") },
