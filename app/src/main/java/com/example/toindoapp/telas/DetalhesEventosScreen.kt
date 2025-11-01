@@ -63,7 +63,7 @@ fun DetalhesEventoScreen(
 
     val conviteStatus by vm.conviteStatus.collectAsState()
 
-    // Observe o estado de ação para navegar de volta após a exclusão
+
     LaunchedEffect(uiState.actionState) {
         when (uiState.actionState) {
             EventoActionState.DELETED -> {
@@ -92,7 +92,7 @@ fun DetalhesEventoScreen(
             TopAppBar(
                 title = { Text(uiState.evento?.nome ?: "Detalhes do Evento") },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White, // MANTIDO - Cor branca para a TopAppBar
+                    containerColor = Color.White,
                     titleContentColor = Color.Black,
                     actionIconContentColor = Color.Black,
                     navigationIconContentColor = Color.Black
@@ -163,7 +163,7 @@ fun DetalhesEventoScreen(
 
                             Text(
                                 text = evento.nome,
-                                style = MaterialTheme.typography.headlineLarge, // Maior
+                                style = MaterialTheme.typography.headlineLarge,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(horizontal = 16.dp)
                             )
@@ -325,12 +325,13 @@ fun DetalheInfoCard(
             )
 
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(5.dp))
 
             Text(
                 text = valor,
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
+                fontSize = 18.sp,
                 maxLines = 2,
                 minLines = 2
             )
@@ -346,30 +347,30 @@ fun CategoryChip(
     Surface(
         modifier = Modifier.padding(end = 10.dp, bottom = 10.dp),
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.1f), // Cor de fundo azul claro
-        contentColor = MaterialTheme.colorScheme.tertiary // Cor do texto azul
+        color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.1f),
+        contentColor = MaterialTheme.colorScheme.tertiary
     ) {
         Text(
             text = category,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 16.sp,
         )
     }
 }
 
 
-// a parte de sobre o evento
 @Composable
 fun SobreOEventoSection(
     descricao: String,
-    categoria: String // MUDANÇA: Agora é uma String, não uma List<String>
+    categoria: String
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 35.dp),
-        horizontalAlignment = Alignment.CenterHorizontally // Centraliza o conteúdo da coluna
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         Text(

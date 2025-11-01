@@ -161,7 +161,7 @@ fun AppNav(vm: AuthViewModel = viewModel()) {
                 ParticipantesScreen(
                     navController = nav,
                     eventoId = eventoId,
-                    creatorId = creatorId // Passa para a tela
+                    creatorId = creatorId
                 )
             }
         }

@@ -10,7 +10,7 @@ import com.example.toindoapp.ui.theme.ToindoTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Permite que o app desenhe atrás das barras do sistema (status e navegação)
+        
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {

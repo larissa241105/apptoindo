@@ -23,9 +23,9 @@ import com.example.toindoapp.viewmodel.eventos.ConvitesViewModel
 @Composable
 fun ConvitesScreen(
     navController: NavController,
-    vm: ConvitesViewModel = viewModel() // Injeta o ViewModel
+    vm: ConvitesViewModel = viewModel()
 ) {
-    // Coleta o estado do ViewModel
+
     val listaDeConvites = vm.convites.value
 
     Scaffold(
@@ -34,7 +34,7 @@ fun ConvitesScreen(
             TopAppBar(
                 title = { Text("Meus Convites") },
                     colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFFFFFFF) // Defina a cor de fundo aqui
+                    containerColor = Color(0xFFFFFFFF)
                     )
             )
 

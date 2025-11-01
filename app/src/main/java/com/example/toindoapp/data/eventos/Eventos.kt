@@ -1,9 +1,9 @@
-// Você pode criar este arquivo, por exemplo, como Evento.kt
+
 import com.google.firebase.firestore.ServerTimestamp
 import java.util.Date
 
 data class Evento(
-    val id: String = "", // <-- CAMPO NOVO ADICIONADO
+    val id: String = "",
     val nome: String = "",
     val data: String = "",
     val horario: String = "",
@@ -12,10 +12,10 @@ data class Evento(
     val isGratuito: Boolean = true,
     val categoria: String = "",
     val isPublico: Boolean = true,
-    val imagemUrl: String? = null, // URL da imagem no Firebase Storage,
-    val creatorId: String = "", // <-- CAMPO ADICIONADO,
+    val imagemUrl: String? = null,
+    val creatorId: String = "",
 
 
     @ServerTimestamp
-    val criadoEm: Date? = null, // Data de criação automática pelo Firestore
+    val criadoEm: Date? = null,
 )

@@ -27,7 +27,7 @@ import com.example.toindoapp.viewmodel.eventos.ParticipantesViewModel
 @Composable
 fun ParticipantesScreen(navController: NavController, eventoId: String, creatorId: String) {
 
-    // Instancia a ViewModel usando a Factory para passar o eventoId
+
     val vm: ParticipantesViewModel = viewModel(factory = ParticipantesViewModel.Factory(eventoId, creatorId))
     val uiState by vm.uiState.collectAsState()
 
@@ -89,8 +89,8 @@ fun ParticipantesScreen(navController: NavController, eventoId: String, creatorI
 @Composable
 fun HeaderDaSecao(texto: String, backgroundColor: Color = MaterialTheme.colorScheme.background) {
     Surface(
-        color = backgroundColor, // Usa a cor que você passar
-        tonalElevation = 0.dp, // <- A MÁGICA ACONTECE AQUI: desativa o "tint" rosado
+        color = backgroundColor,
+        tonalElevation = 0.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
     Text(
@@ -118,10 +118,9 @@ fun ParticipanteItem(convite: Convite) {
                 modifier = Modifier.size(40.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))
-            // NOTA: O ideal é exibir o NOME do usuário, e não o UID.
-            // Veja a sugestão no final da resposta.
+
             Text(
-                text = convite.convidadoUid, // Temporário: exibir o UID
+                text = convite.convidadoUid,
                 fontSize = 16.sp
             )
         }

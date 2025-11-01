@@ -35,13 +35,12 @@ fun ProcurarScreen(
         position = CameraPosition.fromLatLngZoom(localizacaoInicial, 12f)
     }
 
-    // O Scaffold volta a ser o componente principal para organizar a tela
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Procurar") }, // Alterei o título para "Procurar"
+                title = { Text("Procurar") },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFFFFFFF) // Cor de fundo branca
+                    containerColor = Color(0xFFFFFFFF)
                 ),
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
@@ -51,15 +50,15 @@ fun ProcurarScreen(
             )
         },
         bottomBar = {
-            // Supondo que você tenha um Composable chamado BottomMenu
+
             BottomMenu(navController = navController)
         }
     ) { innerPadding ->
-        // O Box agora fica dentro do Scaffold e usa o innerPadding
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding) // Aplica o padding para não sobrepor as barras
+                .padding(innerPadding)
         ) {
             // 1. O Mapa ocupa todo o espaço no fundo
             GoogleMap(
@@ -69,7 +68,7 @@ fun ProcurarScreen(
                 // Conteúdo do mapa vazio
             }
 
-            // 2. A Barra de Pesquisa fica sobre o mapa
+
             OutlinedTextField(
                 value = uiState.searchText,
                 onValueChange = { vm.onSearchTextChange(it) },
@@ -78,7 +77,7 @@ fun ProcurarScreen(
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Pesquisar",
-                        // 1. Cor do ícone alterada aqui
+
                         tint = Color(0xFFDF4A1B)
                     )
                 },
@@ -92,11 +91,9 @@ fun ProcurarScreen(
                     unfocusedContainerColor = Color.White,
                     // 2. Cor da linha/borda alterada aqui
                     focusedBorderColor = Color(0xFFDF4A1B),
-                    unfocusedBorderColor = Color(0xFFDF4A1B) // Opcional: mesma cor para a borda não focada
+                    unfocusedBorderColor = Color(0xFFDF4A1B)
                 )
             )
         }
     }
 }
-
-// **Lembre-se de ter o seu Composable BottomMenu definido em algum lugar, por exemplo:**

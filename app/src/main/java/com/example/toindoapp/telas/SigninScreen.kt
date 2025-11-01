@@ -107,9 +107,9 @@ fun SignInScreen(
                     focusedIndicatorColor = Color.DarkGray,
                     unfocusedIndicatorColor = Color.Gray,
                     cursorColor = Color.Gray,
-                    focusedTextColor = Color.Black, // Adicione esta linha
+                    focusedTextColor = Color.Black,
                     unfocusedTextColor = Color.Black,
-                    focusedLabelColor = Color.Gray, // Cor do label quando o campo está focado
+                    focusedLabelColor = Color.Gray,
                     unfocusedLabelColor = Color.Gray
 
                 )
@@ -171,7 +171,7 @@ fun SignInScreen(
                 cursorColor = Color.Gray,
                 focusedTextColor = Color.Black,
                 unfocusedTextColor = Color.Black,
-                focusedLabelColor = Color.Gray, // Cor do label quando o campo está focado
+                focusedLabelColor = Color.Gray,
                 unfocusedLabelColor = Color.Gray
 
             )
@@ -197,7 +197,7 @@ fun SignInScreen(
                     cursorColor = Color.Gray,
                     focusedTextColor = Color.Black,
                     unfocusedTextColor = Color.Black,
-                    focusedLabelColor = Color.Gray, // Cor do label quando o campo está focado
+                    focusedLabelColor = Color.Gray,
                     unfocusedLabelColor = Color.Gray
 
                 )

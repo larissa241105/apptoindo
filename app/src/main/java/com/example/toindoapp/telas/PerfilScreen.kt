@@ -58,7 +58,7 @@ fun PerfilScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar")
                     }
                 },colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFFFFFF) // Defina a cor de fundo aqui
+                    containerColor = Color(0xFFFFFFF)
                 )
             )
         }
@@ -76,26 +76,26 @@ fun PerfilScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // <<< 2. CRIE A VARIÁVEL DO PAINTER AQUI
+
                 val placeholderPainter = rememberVectorPainter(image = Icons.Default.AccountCircle)
 
-                // Foto do Perfil
+
                 Box(
-                    // Este modifier cria o círculo de fundo cinza
+
                     modifier = Modifier
-                        .size(72.dp) // O tamanho total do círculo
+                        .size(72.dp)
                         .background(
-                            color = Color.LightGray, // A cor de fundo que você quer
-                            shape = CircleShape      // A forma do fundo
+                            color = Color.LightGray,
+                            shape = CircleShape
                         ),
-                    contentAlignment = Alignment.Center // Centraliza o ícone dentro do Box
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Person,
                         contentDescription = "Ícone do Perfil",
-                        // O ícone é um pouco menor que o Box para criar a margem
+
                         modifier = Modifier.size(48.dp),
-                        tint = Color.White // Cor do ícone para contrastar com o fundo
+                        tint = Color.White
                     )
                 }
 

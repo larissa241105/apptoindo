@@ -47,7 +47,7 @@ fun EventosScreen(
             TopAppBar(
                 title = { Text("Eventos") },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFFFFFF) // Defina a cor de fundo aqui
+                    containerColor = Color(0xFFFFFFF)
                 )
             )
         },
@@ -124,9 +124,9 @@ fun EventoCard(evento: Evento, onClick: () -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        // Altere a cor de fundo do Card aqui
+
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF0F0F0) // Exemplo: um cinza claro
+            containerColor = Color(0xFFF0F0F0)
         )
     ) {
 
@@ -139,7 +139,7 @@ fun EventoCard(evento: Evento, onClick: () -> Unit) {
                     .fillMaxWidth()
                     .height(180.dp),
                 contentScale = ContentScale.Crop,
-                // O placeholder e o erro agora funcionam perfeitamente com o Coil
+
                 placeholder = painterResource(id = R.drawable.churrasco),
                 error = painterResource(id = R.drawable.churrasco)
             )
