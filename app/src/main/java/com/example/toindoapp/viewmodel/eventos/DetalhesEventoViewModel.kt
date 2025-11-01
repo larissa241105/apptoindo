@@ -109,15 +109,11 @@ class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
         }
     }
 
-    /**
-     * Limpa a mensagem de status para que o Snackbar não apareça novamente.
-     */
     fun clearConviteStatus() {
         _conviteStatus.value = null
     }
 
 
-    // --- LÓGICA DE EXCLUSÃO ---
     fun deleteEvento() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) } // re-usando o isLoading geral
@@ -130,7 +126,7 @@ class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
         }
     }
 
-    // --- Factory para instanciar a ViewModel com eventoId ---
+
     class Factory(private val eventoId: String) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(DetalhesEventoViewModel::class.java)) {

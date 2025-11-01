@@ -73,7 +73,7 @@ class PerfilViewModel : ViewModel() {
                 }
             }
             .addOnFailureListener {
-               
+
                 _uiState.update {
                     it.copy(
                         nome = "Erro ao buscar nome",

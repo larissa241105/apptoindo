@@ -21,10 +21,10 @@ data class CadastroEventoUiState(
     val local: String = "",
     val preco: String = "",
     val isGratuito: Boolean = false,
+    val descricao: String = "",
     val categoria: String = "",
     val imagemUri: String? = null,
     val isPublico: Boolean = true
-    //val participants: List<String> = emptyList()
 )
 
 // Estado do processo de salvamento (sem alterações)
@@ -51,6 +51,7 @@ class CadastroEventoViewModel : ViewModel() {
     fun onPrecoChange(novoPreco: String) { _uiState.update { it.copy(preco = novoPreco) } }
     fun onGratuitoChange(isGratuito: Boolean) { _uiState.update { it.copy(isGratuito = isGratuito) } }
     fun onCategoriaChange(novaCategoria: String) { _uiState.update { it.copy(categoria = novaCategoria) } }
+    fun onDescricaoChange(novaDescricao: String) { _uiState.update { it.copy(descricao = novaDescricao) } }
     fun onImagemSelected(uri: String?) { _uiState.update { it.copy(imagemUri = uri) } }
     fun onPublicoChange(isPublico: Boolean) { _uiState.update { it.copy(isPublico = isPublico) } }
 
@@ -76,6 +77,8 @@ class CadastroEventoViewModel : ViewModel() {
             try {
                 // Adiciona um timeout de 15 segundos à operação
                 withTimeout(15000L) { // 15000 milissegundos = 15 segundos
+                    val userDoc = Firebase.firestore.collection("users").document(userId).get().await()
+                    val creatorName = userDoc.getString("nome") ?: "Anônimo"
                     val evento = Evento(
                         nome = estadoAtual.nome.trim(),
                         data = estadoAtual.data.trim(),
@@ -83,10 +86,11 @@ class CadastroEventoViewModel : ViewModel() {
                         local = estadoAtual.local.trim(),
                         preco = if (estadoAtual.isGratuito) 0.0 else estadoAtual.preco.toDoubleOrNull() ?: 0.0,
                         isGratuito = estadoAtual.isGratuito,
+                        descricao = estadoAtual.descricao.trim(),
                         categoria = estadoAtual.categoria,
                         isPublico = estadoAtual.isPublico,
-                        creatorId = userId // <-- SALVANDO O ID DO USUÁRIO
-                        //participants = listOf()
+                        creatorId = userId,
+                        creatorName = creatorName
                     )
 
                     println("DEBUG: [2] Objeto Evento criado. Tentando enviar para o Firestore.")

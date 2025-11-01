@@ -225,7 +225,7 @@ fun DetalhesEventoScreen(
 
 
                             SobreOEventoSection(
-                                descricao = evento.nome,
+                                descricao = evento.descricao,
                                 categoria = evento.categoria
                             )
 

@@ -10,7 +10,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.AttachMoney
 import androidx.compose.material.icons.outlined.DateRange
+import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -102,7 +104,7 @@ fun EventosScreen(
                             EventoCard(
                                 evento = evento,
                                 onClick = {
-                                    // Esta linha é a responsável por iniciar a navegação
+
                                     navController.navigate("detalhes_evento/${evento.id}")
                                 }
                             )
@@ -132,18 +134,59 @@ fun EventoCard(evento: Evento, onClick: () -> Unit) {
 
         Column {
 
-            AsyncImage(
-                model = evento.imagemUrl,
-                contentDescription = evento.nome,
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp),
-                contentScale = ContentScale.Crop,
+                    .height(180.dp)
+            ) {
+                AsyncImage(
+                    model = evento.imagemUrl,
+                    contentDescription = evento.nome,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp),
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(id = R.drawable.churrasco),
+                    error = painterResource(id = R.drawable.churrasco)
+                )
 
-                placeholder = painterResource(id = R.drawable.churrasco),
-                error = painterResource(id = R.drawable.churrasco)
-            )
+                // Tags de GRÁTIS e Hobby/Público
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    if (evento.isGratuito || evento.preco == 0.0) {
+                        Surface(
+                            color = Color(0xFF388E3C), // Cor verde para "GRÁTIS"
+                            shape = RoundedCornerShape(4.dp),
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        ) {
+                            Text(
+                                text = "GRÁTIS",
+                                color = Color.White,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
 
+                    Surface(
+                        color = Color(0xFF673AB7), // Cor roxa para "Público" ou "Hobby"
+                        shape = RoundedCornerShape(4.dp)
+                    ) {
+                        Text(
+                            text = if (evento.isPublico) "Público" else "Privado",
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+            }
 
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -165,7 +208,7 @@ fun EventoCard(evento: Evento, onClick: () -> Unit) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(text = evento.local, style = MaterialTheme.typography.bodyMedium, color = Color.Black, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
-                // --- LINHAS ADICIONADAS PARA MOSTRAR O PREÇO ---
+
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(imageVector = Icons.Outlined.AttachMoney, contentDescription = "Preço", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.tertiary)
                     Spacer(modifier = Modifier.width(8.dp))
@@ -176,6 +219,24 @@ fun EventoCard(evento: Evento, onClick: () -> Unit) {
                         String.format("R$ %.2f", evento.preco).replace('.', ',')
                     }
                     Text(text = precoTexto, style = MaterialTheme.typography.bodyMedium, color = Color.Black)
+                }
+
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(imageVector = Icons.Outlined.Person, contentDescription = "Criador", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.tertiary)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = evento.creatorName, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(imageVector = Icons.Outlined.Group, contentDescription = "Participantes", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.tertiary)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "${evento.participantesCount} participantes", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    }
                 }
             }
         }

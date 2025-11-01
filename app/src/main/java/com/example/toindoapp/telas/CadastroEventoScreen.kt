@@ -84,7 +84,7 @@ fun CadastroEventoScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFFFFFF) // Defina a cor de fundo aqui
+                    containerColor = Color(0xFFFFFFF)
                 )
             )
         },
@@ -122,6 +122,7 @@ fun CadastroEventoScreen(
             }
 
             item { OutlinedTextField(value = uiState.nome, onValueChange = vm::onNomeChange, label = { Text("Nome do Evento") }, modifier = Modifier.fillMaxWidth()) }
+            item { OutlinedTextField(value = uiState.descricao, onValueChange = vm::onDescricaoChange, label = { Text("Descrição") }, modifier = Modifier.fillMaxWidth()) }
 
             item {
                 Box(modifier = Modifier.clickable { showDatePicker = true }) {
@@ -194,6 +195,7 @@ fun CadastroEventoScreen(
                 }
             }
 
+
             item {
                 ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
                     OutlinedTextField(
@@ -217,6 +219,8 @@ fun CadastroEventoScreen(
                     }
                 }
             }
+
+
 
                 item {
                     Button(

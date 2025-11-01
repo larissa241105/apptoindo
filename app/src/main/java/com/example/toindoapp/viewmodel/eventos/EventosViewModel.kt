@@ -30,7 +30,7 @@ class EventosViewModel : ViewModel() {
     val uiState = _uiState.asStateFlow()
 
     init {
-        // Ao iniciar, busca os eventos da primeira aba (Explorar)
+        
         fetchEventosForSelectedTab()
     }
 
@@ -43,23 +43,23 @@ class EventosViewModel : ViewModel() {
                 val userId = Firebase.auth.currentUser?.uid
                 val firestore = Firebase.firestore.collection("eventos")
 
-                // Cria a query base
+
                 val finalQuery = when (currentTab) {
                     EventosTab.EXPLORAR -> {
                         if (userId != null) {
-                            // Busca todos os eventos criados por outras pessoas
+
                             firestore.whereNotEqualTo("creatorId", userId)
                         } else {
-                            // Se não houver usuário logado, mostra todos os eventos
+
                             firestore
                         }
                     }
                     EventosTab.MEUS_EVENTOS -> {
-                        // Busca apenas os eventos criados pelo usuário logado
+
                         if (userId != null) {
                             firestore.whereEqualTo("creatorId", userId)
                         } else {
-                            // Se o usuário não estiver logado, não busca nada
+
                             null
                         }
                     }
@@ -68,20 +68,22 @@ class EventosViewModel : ViewModel() {
                 val eventos = if (finalQuery != null) {
                     val snapshot = finalQuery.get().await()
                     snapshot.documents.mapNotNull { document ->
-                        // 1. Mapeia o documento para o objeto Evento
+
                         val eventoObj = document.toObject(Evento::class.java)
 
-                        // 2. Lê explicitamente o campo 'isGratuito' do documento
-                        val isGratuitoFromFirebase = document.getBoolean("isGratuito") ?: false
 
-                        // 3. Retorna uma cópia do objeto com o valor corrigido
+                        val isGratuitoFromFirebase = document.getBoolean("isGratuito") ?: false
+                        val isPublicoFromFirebase = document.getBoolean("isPublico") ?: true
+
+
                         eventoObj?.copy(
                             id = document.id,
-                            isGratuito = isGratuitoFromFirebase // Usa o valor lido explicitamente
+                            isGratuito = isGratuitoFromFirebase,
+                            isPublico = isPublicoFromFirebase
                         )
                     }
                 } else {
-                    emptyList() // Retorna uma lista vazia se a query for nula
+                    emptyList()
                 }
 
                 _uiState.update {
@@ -98,7 +100,7 @@ class EventosViewModel : ViewModel() {
 
 
     fun onTabSelected(tab: EventosTab) {
-        // Atualiza a aba selecionada e busca os eventos correspondentes
+
         _uiState.update { it.copy(selectedTab = tab) }
         fetchEventosForSelectedTab()
     }
