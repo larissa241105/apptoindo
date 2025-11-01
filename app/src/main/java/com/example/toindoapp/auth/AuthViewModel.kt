@@ -13,10 +13,11 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-// 1. MUDANÇA AQUI: Trocamos 'isSuccess' por 'user'
 data class AuthUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
@@ -25,10 +26,11 @@ data class AuthUiState(
 
 class AuthViewModel : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
+    private val db = FirebaseFirestore.getInstance()
+
     private val _state = MutableStateFlow(AuthUiState())
     val state: StateFlow<AuthUiState> = _state
 
-    // 2. MUDANÇA AQUI: A função 'ok' agora armazena o usuário
     private fun ok() {
         _state.value = AuthUiState(user = auth.currentUser)
     }
@@ -37,15 +39,26 @@ class AuthViewModel : ViewModel() {
         _state.value = AuthUiState(error = mapError(exception))
     }
 
-    fun signIn(email: String, pass: String) {
-        setLoading()
-        auth.signInWithEmailAndPassword(email, pass)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    ok()
-                } else {
-                    fail(task.exception)
-                }
+
+    private fun createUserInFirestore(user: FirebaseUser, name: String) {
+
+        val userRef = db.collection("users").document(user.uid)
+
+
+        val userData = hashMapOf(
+            "uid" to user.uid,
+            "nome" to name,
+            "email" to user.email
+        )
+
+        userRef.set(userData, SetOptions.merge())
+            .addOnSuccessListener {
+
+                ok()
+            }
+            .addOnFailureListener { e ->
+
+                fail(e)
             }
     }
 
@@ -56,22 +69,22 @@ class AuthViewModel : ViewModel() {
                 if (task.isSuccessful) {
                     val user = auth.currentUser
                     if (user != null) {
+
                         val profileUpdates = UserProfileChangeRequest.Builder()
                             .setDisplayName(name)
                             .build()
                         user.updateProfile(profileUpdates)
                             .addOnCompleteListener { profileTask ->
                                 if (profileTask.isSuccessful) {
-                                    // Perfil atualizado com sucesso
-                                    ok()
+                                    // 2. CHAMA A FUNÇÃO DE CRIAR NO FIRESTORE
+                                    createUserInFirestore(user, name)
                                 } else {
-                                    // Ocorreu um erro ao atualizar o perfil
-                                    fail(profileTask.exception)
+
+                                    createUserInFirestore(user, name)
                                 }
                             }
                     } else {
-                        // Não há usuário para atualizar
-                        ok()
+                        fail(Exception("Usuário nulo após criação."))
                     }
                 } else {
                     fail(task.exception)
@@ -85,6 +98,28 @@ class AuthViewModel : ViewModel() {
         auth.signInWithCredential(credential)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
+                    val user = auth.currentUser
+                    if (user != null) {
+
+                        val nameFromGoogle = user.displayName ?: "Usuário Google"
+
+
+                        createUserInFirestore(user, nameFromGoogle)
+                    } else {
+                        fail(Exception("Usuário nulo após login com Google."))
+                    }
+                } else {
+                    fail(task.exception)
+                }
+            }
+    }
+
+    fun signIn(email: String, pass: String) {
+        setLoading()
+        auth.signInWithEmailAndPassword(email, pass)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+
                     ok()
                 } else {
                     fail(task.exception)
@@ -105,7 +140,6 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    // 3. MUDANÇA AQUI: 'resetState' limpa o usuário e o erro
     fun resetState() {
         _state.value = AuthUiState()
     }

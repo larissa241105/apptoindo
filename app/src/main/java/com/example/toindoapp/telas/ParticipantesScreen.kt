@@ -7,7 +7,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -20,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.toindoapp.data.eventos.Convite
+import com.example.toindoapp.viewmodel.eventos.ParticipanteDisplay
 import com.example.toindoapp.viewmodel.eventos.ParticipantesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -37,7 +36,7 @@ fun ParticipantesScreen(navController: NavController, eventoId: String, creatorI
             TopAppBar(
                 title = { Text("Participantes") },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFFFFFF) // Defina a cor de fundo aqui
+                    containerColor = Color(0xFFFFFFF)
                 ),
                         navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
@@ -66,8 +65,9 @@ fun ParticipantesScreen(navController: NavController, eventoId: String, creatorI
                         backgroundColor = Color(0xFFFFFFFF)
                         )
                 }
-                items(uiState.confirmados) { convite ->
-                    ParticipanteItem(convite = convite)
+                items(uiState.confirmados, key = { it.userId }) { participante ->
+
+                    ParticipanteItem(participante = participante)
                 }
 
 
@@ -77,8 +77,9 @@ fun ParticipantesScreen(navController: NavController, eventoId: String, creatorI
                             backgroundColor = Color(0xFFFFFFFF)
                             )
                     }
-                    items(uiState.pendentes) { convite ->
-                        ParticipanteItem(convite = convite)
+                    items(uiState.pendentes, key = { it.userId }) { participante ->
+
+                        ParticipanteItem(participante = participante)
                     }
                 }
             }
@@ -106,23 +107,20 @@ fun HeaderDaSecao(texto: String, backgroundColor: Color = MaterialTheme.colorSch
 }}
 
 @Composable
-fun ParticipanteItem(convite: Convite) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = null,
-                modifier = Modifier.size(40.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
+fun ParticipanteItem(participante: ParticipanteDisplay) { // <-- MUDE AQUI
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
 
-            Text(
-                text = convite.convidadoUid,
-                fontSize = 16.sp
-            )
-        }
+        Text(
+            text = participante.nome,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium
+        )
+
     }
 }
