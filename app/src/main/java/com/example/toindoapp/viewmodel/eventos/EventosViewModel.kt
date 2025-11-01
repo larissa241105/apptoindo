@@ -68,18 +68,19 @@ class EventosViewModel : ViewModel() {
                 val eventos = if (finalQuery != null) {
                     val snapshot = finalQuery.get().await()
                     snapshot.documents.mapNotNull { document ->
-
                         val eventoObj = document.toObject(Evento::class.java)
 
 
                         val isGratuitoFromFirebase = document.getBoolean("isGratuito") ?: false
                         val isPublicoFromFirebase = document.getBoolean("publico") ?: true
 
+                        val contagem = document.getLong("participantesCount")?.toInt() ?: 0
 
                         eventoObj?.copy(
                             id = document.id,
                             isGratuito = isGratuitoFromFirebase,
-                            publico = isPublicoFromFirebase
+                            publico = isPublicoFromFirebase,
+                            participantesCount = contagem
                         )
                     }
                 } else {

@@ -232,53 +232,118 @@ fun DetalhesEventoScreen(
                             Spacer(modifier = Modifier.height(32.dp))
 
 
-                            if (uiState.isUserCreator) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Text(
-                                        "Convidar um amigo:",
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-                                    OutlinedTextField(
-                                        value = convidado,
-                                        onValueChange = { convidado = it },
-                                        label = { Text("Insira o UID do seu amigo") },
-                                        modifier = Modifier.fillMaxWidth(),
-                                        singleLine = true,
-                                        enabled = !uiState.isSendingInvite
-                                    )
-                                    Spacer(modifier = Modifier.height(12.dp))
-                                    Button(
-                                        modifier = Modifier.fillMaxWidth().height(52.dp),
-                                        shape = RoundedCornerShape(12.dp),
-                                        onClick = {
-                                            vm.enviarConvite(convidado)
-                                            convidado = ""
-                                        },
-                                        enabled = !uiState.isSendingInvite
-                                    ) {
-                                        if (uiState.isSendingInvite) {
-                                            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
-                                        } else {
-                                            Text("Enviar Convite", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                            // --- INÍCIO DA SEÇÃO MODIFICADA ---
+                            // O 'if (uiState.isUserCreator)' foi substituído por este Box/when
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp), // Padding padrão
+                                contentAlignment = Alignment.Center
+                            ) {
+                                when {
+                                    // Caso 1: O usuário é o CRIADOR do evento
+                                    uiState.isUserCreator -> {
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth(), // Não precisa de padding horizontal aqui, pois o Box já tem
+                                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Text(
+                                                "Convidar um amigo:",
+                                                style = MaterialTheme.typography.titleMedium
+                                            )
+                                            OutlinedTextField(
+                                                value = convidado,
+                                                onValueChange = { convidado = it },
+                                                label = { Text("Insira o UID do seu amigo") },
+                                                modifier = Modifier.fillMaxWidth(),
+                                                singleLine = true,
+                                                enabled = !uiState.isSendingInvite
+                                            )
+                                            Spacer(modifier = Modifier.height(12.dp))
+                                            Button(
+                                                modifier = Modifier.fillMaxWidth().height(52.dp),
+                                                shape = RoundedCornerShape(12.dp),
+                                                onClick = {
+                                                    vm.enviarConvite(convidado)
+                                                    convidado = ""
+                                                },
+                                                enabled = !uiState.isSendingInvite
+                                            ) {
+                                                if (uiState.isSendingInvite) {
+                                                    CircularProgressIndicator(
+                                                        modifier = Modifier.size(24.dp),
+                                                        color = MaterialTheme.colorScheme.onPrimary,
+                                                        strokeWidth = 2.dp
+                                                    )
+                                                } else {
+                                                    Text(
+                                                        "Enviar Convite",
+                                                        fontSize = 16.sp,
+                                                        fontWeight = FontWeight.SemiBold
+                                                    )
+                                                }
+                                            }
+                                            Button(
+                                                onClick = { vm.deleteEvento() },
+                                                modifier = Modifier.fillMaxWidth().height(52.dp),
+                                                colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                                                shape = RoundedCornerShape(12.dp)
+                                            ) {
+                                                Text(
+                                                    "Excluir Evento",
+                                                    fontSize = 16.sp,
+                                                    fontWeight = FontWeight.SemiBold
+                                                )
+                                            }
                                         }
                                     }
-                                    Button(
-                                        onClick = { vm.deleteEvento() },
-                                        modifier = Modifier.fillMaxWidth().height(52.dp),
-                                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                                        shape = RoundedCornerShape(12.dp)
-                                    ) {
-                                        Text("Excluir Evento", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+
+                                    // Caso 2: O evento é PÚBLICO (e o usuário não é o criador)
+                                    // Lembre-se que confirmamos que o nome do campo é 'publico'
+                                    uiState.evento?.publico == true -> {
+                                        Button(
+                                            onClick = { vm.participarEvento() },
+                                            modifier = Modifier.fillMaxWidth().height(52.dp),
+                                            shape = RoundedCornerShape(12.dp),
+                                            // Desabilita o botão se já estiver participando ou carregando
+                                            enabled = !uiState.isUserParticipating && !uiState.isJoiningEvent
+                                        ) {
+                                            when {
+                                                // Carregando...
+                                                uiState.isJoiningEvent -> {
+                                                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
+                                                }
+                                                // Já participa
+                                                uiState.isUserParticipating -> {
+                                                    Text("Você está participando!", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                                                }
+                                                // Pode participar
+                                                else -> {
+                                                    Text("Participar do Evento", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    // Caso 3: O evento é PRIVADO (e o usuário não é o criador)
+                                    else -> {
+                                        Text(
+                                            "Este é um evento privado. Você só pode participar se for convidado pelo criador.",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            textAlign = TextAlign.Center,
+                                            color = Color.Gray,
+                                            modifier = Modifier.padding(horizontal = 16.dp)
+                                        )
                                     }
                                 }
                             }
+
+
                             Spacer(modifier = Modifier.height(16.dp)) // Espaço no final da rolagem
+
+
                         }
                     }
                 }

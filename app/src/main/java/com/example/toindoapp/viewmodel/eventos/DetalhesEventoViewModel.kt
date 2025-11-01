@@ -10,28 +10,38 @@ import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import com.example.toindoapp.data.eventos.Convite
+import com.google.firebase.firestore.FieldValue
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-// Adicione um estado de ação para a UI saber o que fazer após a exclusão
 enum class EventoActionState { IDLE, DELETED }
 
 data class DetalhesEventoUiState(
     val isLoading: Boolean = true,
-    val isSendingInvite: Boolean = false, // Novo: para o feedback do botão de convite
+    val isSendingInvite: Boolean = false,
     val evento: Evento? = null,
     val isUserCreator: Boolean = false,
     val error: String? = null,
-    val actionState: EventoActionState = EventoActionState.IDLE
+    val actionState: EventoActionState = EventoActionState.IDLE,
+    val isUserParticipating: Boolean = false,
+    val isJoiningEvent: Boolean = false
 )
+
+data class Convite(
+    val nomeDoEvento: String = "",
+    val quemConvidou: String = "",
+    val convidadoUid: String = "",
+    val eventoId: String = "",
+    val status: String = "PENDENTE"
+)
+
 
 class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DetalhesEventoUiState())
     val uiState = _uiState.asStateFlow()
 
-    // StateFlow separado para mensagens de status (Snackbar)
     private val _conviteStatus = MutableStateFlow<String?>(null)
     val conviteStatus = _conviteStatus.asStateFlow()
 
@@ -48,20 +58,60 @@ class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
                     .get()
                     .await()
 
-                val evento = document.toObject(Evento::class.java)?.copy(id = document.id)
+                if (!document.exists()) {
+                    _uiState.update { it.copy(isLoading = false, error = "Evento não encontrado.") }
+                    return@launch
+                }
+
+
+                val eventoObj = document.toObject(Evento::class.java)
                 val userId = Firebase.auth.currentUser?.uid
-                val isCreator = (userId != null && evento?.creatorId == userId)
+
+                val publicoFromFirebase = document.getBoolean("publico") ?: true
+                val isGratuitoFromFirebase = document.getBoolean("isGratuito") ?: false
+                val contagem = document.getLong("participantesCount")?.toInt() ?: 0
+                val participantes = document.get("participantIds") as? List<String> ?: emptyList()
+
+                val isCreator = (userId != null && eventoObj?.creatorId == userId)
+
+                var isParticipando = false
+                if (userId != null) {
+                    val conviteQuery = Firebase.firestore.collection("convites")
+                        .whereEqualTo("eventoId", eventoId)
+                        .whereEqualTo("convidadoUid", userId)
+                        .whereEqualTo("status", "ACEITO") // <-- Só conta se estiver ACEITO
+                        .limit(1)
+                        .get()
+                        .await()
+                    isParticipando = !conviteQuery.isEmpty
+                }
+
+                val eventoFinal = eventoObj?.copy(
+                    id = document.id,
+                    publico = publicoFromFirebase,
+                    isGratuito = isGratuitoFromFirebase,
+                    participantesCount = contagem // <-- Adicione a contagem
+                )
+
+
+
 
                 _uiState.update {
-                    it.copy(isLoading = false, evento = evento, isUserCreator = isCreator)
+                    it.copy(
+                        isLoading = false,
+                        evento = eventoFinal,
+                        isUserCreator = isCreator,
+                        isUserParticipating = isParticipando // <-- Define o estado do botão
+                    )
                 }
+
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
         }
     }
 
-    // --- LÓGICA DE CONVITE ---
+
     fun enviarConvite(convidadoUid: String) {
         viewModelScope.launch {
             // Validações iniciais
@@ -86,28 +136,103 @@ class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
             try {
                 // Cria o objeto do convite
                 val novoConvite = Convite(
-                    nomeDoEvento = eventoAtual.nome, // Supondo que seu Evento tem um campo 'name'
+                    nomeDoEvento = eventoAtual.nome,
                     quemConvidou = usuarioAtual.displayName ?: "Criador do Evento",
-                    convidadoUid = convidadoUid.trim(), // Remove espaços em branco
+                    convidadoUid = convidadoUid.trim(),
                     eventoId = eventoId,
                     status = "PENDENTE"
                 )
 
-                // Salva o novo documento na coleção "convites"
                 Firebase.firestore.collection("convites").add(novoConvite).await()
 
-                // Atualiza o status com sucesso
+
                 _conviteStatus.value = "Convite enviado com sucesso!"
 
             } catch (e: Exception) {
-                // Atualiza o status com erro
+
                 _conviteStatus.value = "Falha ao enviar convite: ${e.message}"
             } finally {
-                // Finaliza o estado de carregamento
+
                 _uiState.update { it.copy(isSendingInvite = false) }
             }
         }
     }
+
+
+    fun participarEvento() {
+        if (_uiState.value.isJoiningEvent) return
+
+        val userId = Firebase.auth.currentUser?.uid
+        val evento = _uiState.value.evento
+
+        if (userId == null || evento == null) {
+            _uiState.update { it.copy(error = "Erro: Usuário ou evento não encontrado.") }
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isJoiningEvent = true) }
+            try {
+                val convitesRef = Firebase.firestore.collection("convites")
+                val eventoRef = Firebase.firestore.collection("eventos").document(evento.id)
+
+                // 1. Verifica se já existe um convite (PENDENTE ou RECUSADO)
+                val query = convitesRef
+                    .whereEqualTo("eventoId", evento.id)
+                    .whereEqualTo("convidadoUid", userId)
+                    .limit(1)
+                    .get()
+                    .await()
+
+                var jaEstavaAceito = false
+
+                if (query.isEmpty) {
+                    // 2.A. Não existe convite. Cria um novo já como "ACEITO".
+                    val novoConvite = Convite(
+                        nomeDoEvento = evento.nome,
+                        quemConvidou = "Participação Pública", // ou "self"
+                        convidadoUid = userId,
+                        eventoId = evento.id,
+                        status = "ACEITO"
+                    )
+                    convitesRef.add(novoConvite).await()
+
+                } else {
+                    // 2.B. Já existe um convite. Apenas atualiza o status.
+                    val docId = query.documents.first().id
+                    val statusAtual = query.documents.first().getString("status")
+
+                    if (statusAtual == "ACEITO") {
+                        jaEstavaAceito = true // Já participava, não incrementa a contagem
+                    } else {
+                        convitesRef.document(docId).update("status", "ACEITO").await()
+                    }
+                }
+
+                // 3. Incrementa a contagem no evento (APENAS se não estava aceito antes)
+                if (!jaEstavaAceito) {
+                    eventoRef.update("participantesCount", FieldValue.increment(1)).await()
+                }
+
+                // 4. Atualiza a UI
+                _uiState.update {
+                    it.copy(
+                        isJoiningEvent = false,
+                        isUserParticipating = true // Agora está participando
+                    )
+                }
+
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isJoiningEvent = false,
+                        error = "Falha ao participar: ${e.message}"
+                    )
+                }
+            }
+        }
+    }
+
 
     fun clearConviteStatus() {
         _conviteStatus.value = null
