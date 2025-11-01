@@ -30,7 +30,7 @@ class EventosViewModel : ViewModel() {
     val uiState = _uiState.asStateFlow()
 
     init {
-        
+
         fetchEventosForSelectedTab()
     }
 
@@ -73,13 +73,13 @@ class EventosViewModel : ViewModel() {
 
 
                         val isGratuitoFromFirebase = document.getBoolean("isGratuito") ?: false
-                        val isPublicoFromFirebase = document.getBoolean("isPublico") ?: true
+                        val isPublicoFromFirebase = document.getBoolean("publico") ?: true
 
 
                         eventoObj?.copy(
                             id = document.id,
                             isGratuito = isGratuitoFromFirebase,
-                            isPublico = isPublicoFromFirebase
+                            publico = isPublicoFromFirebase
                         )
                     }
                 } else {

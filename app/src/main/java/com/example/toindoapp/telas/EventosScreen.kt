@@ -150,7 +150,7 @@ fun EventoCard(evento: Evento, onClick: () -> Unit) {
                     error = painterResource(id = R.drawable.churrasco)
                 )
 
-                // Tags de GRÁTIS e Hobby/Público
+
                 Column(
                     modifier = Modifier
                         .align(Alignment.TopStart)
@@ -178,7 +178,7 @@ fun EventoCard(evento: Evento, onClick: () -> Unit) {
                         shape = RoundedCornerShape(4.dp)
                     ) {
                         Text(
-                            text = if (evento.isPublico) "Público" else "Privado",
+                            text = if (evento.publico) "Público" else "Privado",
                             color = Color.White,
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,

@@ -170,10 +170,10 @@ fun CadastroEventoScreen(
                 Column {
                     Text("Visibilidade do Evento", style = MaterialTheme.typography.bodyLarge)
                     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        RadioButton(selected = uiState.isPublico, onClick = { vm.onPublicoChange(true) })
+                        RadioButton(selected = uiState.publico, onClick = { vm.onPublicoChange(true) })
                         Text("Público", modifier = Modifier.clickable { vm.onPublicoChange(true) })
                         Spacer(modifier = Modifier.width(16.dp))
-                        RadioButton(selected = !uiState.isPublico, onClick = { vm.onPublicoChange(false) })
+                        RadioButton(selected = !uiState.publico, onClick = { vm.onPublicoChange(false) })
                         Text("Privado", modifier = Modifier.clickable { vm.onPublicoChange(false) })
                     }
                 }

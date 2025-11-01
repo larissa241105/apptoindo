@@ -13,7 +13,7 @@ data class Evento(
     val isGratuito: Boolean = true,
     val categoria: String = "",
     val creatorName: String = "Desconhecido",
-    val isPublico: Boolean = true,
+    val publico: Boolean = true,
     val participantesCount: Int = 0,
     val imagemUrl: String? = null,
     val creatorId: String = "",

@@ -24,7 +24,7 @@ data class CadastroEventoUiState(
     val descricao: String = "",
     val categoria: String = "",
     val imagemUri: String? = null,
-    val isPublico: Boolean = true
+    val publico: Boolean = true
 )
 
 // Estado do processo de salvamento (sem alterações)
@@ -53,7 +53,7 @@ class CadastroEventoViewModel : ViewModel() {
     fun onCategoriaChange(novaCategoria: String) { _uiState.update { it.copy(categoria = novaCategoria) } }
     fun onDescricaoChange(novaDescricao: String) { _uiState.update { it.copy(descricao = novaDescricao) } }
     fun onImagemSelected(uri: String?) { _uiState.update { it.copy(imagemUri = uri) } }
-    fun onPublicoChange(isPublico: Boolean) { _uiState.update { it.copy(isPublico = isPublico) } }
+    fun onPublicoChange(isPublico: Boolean) { _uiState.update { it.copy(publico = isPublico) } }
 
 
     fun salvarEvento() {
@@ -88,7 +88,7 @@ class CadastroEventoViewModel : ViewModel() {
                         isGratuito = estadoAtual.isGratuito,
                         descricao = estadoAtual.descricao.trim(),
                         categoria = estadoAtual.categoria,
-                        isPublico = estadoAtual.isPublico,
+                        publico = estadoAtual.publico,
                         creatorId = userId,
                         creatorName = creatorName
                     )
