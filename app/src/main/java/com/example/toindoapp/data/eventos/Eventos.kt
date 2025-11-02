@@ -17,6 +17,8 @@ data class Evento(
     val participantesCount: Int = 0,
     val imagemUrl: String? = null,
     val creatorId: String = "",
+    val latitude: Double = 0.0,
+    val longitude: Double = 0.0,
 
 
     @ServerTimestamp

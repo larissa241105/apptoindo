@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -20,6 +21,8 @@ import com.example.toindoapp.viewmodel.eventos.ProcurarViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,9 +33,18 @@ fun ProcurarScreen(
 ) {
     val uiState by vm.uiState.collectAsState()
 
-    val localizacaoInicial = LatLng(-3.1190, -60.0217)
+    val localizacaoInicial = LatLng(-3.1190, -60.0217) // Manaus
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(localizacaoInicial, 12f)
+    }
+
+    LaunchedEffect(uiState.eventos) {
+        if (uiState.eventos.isNotEmpty()) {
+            println("DEBUG: Eventos carregados: ${uiState.eventos.size}")
+            println("DEBUG: Coordenadas do primeiro evento: (${uiState.eventos.first().latitude}, ${uiState.eventos.first().longitude})")
+        } else {
+            println("DEBUG: uiState.eventos está vazio.")
+        }
     }
 
     Scaffold(
@@ -65,35 +77,42 @@ fun ProcurarScreen(
                 modifier = Modifier.fillMaxSize(),
                 cameraPositionState = cameraPositionState
             ) {
-                // Conteúdo do mapa vazio
+                uiState.eventos.forEach { evento ->
+                    // (Verifique se 'latitude' e 'longitude' existem na sua data class 'Evento')
+                    val posicao = LatLng(evento.latitude, evento.longitude)
+                    Marker(
+                        state = MarkerState(position = posicao),
+                        title = evento.nome,
+                        snippet = evento.local
+                    )
+                }
             }
 
+                OutlinedTextField(
+                    value = uiState.searchText,
+                    onValueChange = { vm.onSearchTextChange(it) },
+                    placeholder = { Text("Pesquisar eventos...") },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Pesquisar",
 
-            OutlinedTextField(
-                value = uiState.searchText,
-                onValueChange = { vm.onSearchTextChange(it) },
-                placeholder = { Text("Pesquisar eventos...") },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Pesquisar",
-
-                        tint = Color(0xFFDF4A1B)
+                            tint = Color(0xFFDF4A1B)
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .align(Alignment.TopCenter),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        // 2. Cor da linha/borda alterada aqui
+                        focusedBorderColor = Color(0xFFDF4A1B),
+                        unfocusedBorderColor = Color(0xFFDF4A1B)
                     )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .align(Alignment.TopCenter),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    // 2. Cor da linha/borda alterada aqui
-                    focusedBorderColor = Color(0xFFDF4A1B),
-                    unfocusedBorderColor = Color(0xFFDF4A1B)
                 )
-            )
+            }
         }
     }
-}

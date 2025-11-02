@@ -75,9 +75,9 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
     implementation("com.google.android.gms:play-services-auth:21.2.0") // Use a versão mais recente
-
+    implementation("com.google.android.libraries.places:places:3.5.0")
     implementation(libs.glide.compose)
-
+    implementation("androidx.appcompat:appcompat:1.7.0") // Or a more recent stable version
     // build.gradle.kts (Kotlin DSL)
     implementation("androidx.compose.material:material-icons-extended-android:1.6.8") // Use a versão mais recente compatível
 

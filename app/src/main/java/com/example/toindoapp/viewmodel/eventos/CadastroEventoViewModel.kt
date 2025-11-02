@@ -1,6 +1,9 @@
 package com.example.toindoapp.viewmodel.eventos
 
 import Evento // Certifique-se de que a importação do seu modelo de dados está correta
+import PlaceData
+import android.content.Context
+import android.location.Geocoder
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Firebase
@@ -12,8 +15,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withTimeout
+import java.io.IOException
+import java.util.Locale
 
-// Estado da UI para o formulário (sem alterações)
+data class PlaceData(
+    val address: String,
+    val latLng: com.google.android.gms.maps.model.LatLng // Verifique esta importação!
+)
+
 data class CadastroEventoUiState(
     val nome: String = "",
     val data: String = "",
@@ -24,7 +33,9 @@ data class CadastroEventoUiState(
     val descricao: String = "",
     val categoria: String = "",
     val imagemUri: String? = null,
-    val publico: Boolean = true
+    val publico: Boolean = true,
+    val latitude: Double = 0.0,
+    val longitude: Double = 0.0,
 )
 
 // Estado do processo de salvamento (sem alterações)
@@ -47,7 +58,18 @@ class CadastroEventoViewModel : ViewModel() {
     fun onNomeChange(novoNome: String) { _uiState.update { it.copy(nome = novoNome) } }
     fun onDataChange(novaData: String) { _uiState.update { it.copy(data = novaData) } }
     fun onHorarioChange(novoHorario: String) { _uiState.update { it.copy(horario = novoHorario) } }
-    fun onLocalChange(novoLocal: String) { _uiState.update { it.copy(local = novoLocal) } }
+
+    // Esta função é chamada pelo Autocomplete
+    fun onLocalSelected(placeData: PlaceData) {
+        _uiState.update {
+            it.copy(
+                local = placeData.address, // Salva o nome/endereço
+                latitude = placeData.latLng.latitude,
+                longitude = placeData.latLng.longitude
+            )
+        }
+    }
+
     fun onPrecoChange(novoPreco: String) { _uiState.update { it.copy(preco = novoPreco) } }
     fun onGratuitoChange(isGratuito: Boolean) { _uiState.update { it.copy(isGratuito = isGratuito) } }
     fun onCategoriaChange(novaCategoria: String) { _uiState.update { it.copy(categoria = novaCategoria) } }
@@ -56,29 +78,43 @@ class CadastroEventoViewModel : ViewModel() {
     fun onPublicoChange(isPublico: Boolean) { _uiState.update { it.copy(publico = isPublico) } }
 
 
-    fun salvarEvento() {
+    fun salvarEvento() { // <-- Removido o 'context'
         if (_saveState.value is SaveState.Loading) return
 
         val userId = Firebase.auth.currentUser?.uid
         if (userId == null) {
-            // Se não houver usuário logado, não podemos salvar. Mostra um erro.
             _saveState.value = SaveState.Error("Você precisa estar logado para criar um evento.")
             return
         }
         val estadoAtual = _uiState.value
-        if (estadoAtual.nome.isBlank() || estadoAtual.data.isBlank() || estadoAtual.local.isBlank()) {
-            _saveState.value = SaveState.Error("Nome, data e local são obrigatórios.")
+
+        // Validação 1
+        if (estadoAtual.nome.isBlank() || estadoAtual.data.isBlank()) {
+            _saveState.value = SaveState.Error("Nome e data são obrigatórios.")
+            return
+        }
+
+        // Validação 2 (do Autocomplete)
+        if (estadoAtual.local.isBlank() || estadoAtual.latitude == 0.0) {
+            _saveState.value = SaveState.Error("Por favor, selecione um local válido.")
             return
         }
 
         viewModelScope.launch {
             _saveState.value = SaveState.Loading
-            println("DEBUG: [1] Iniciando o processo de salvamento.")
+
             try {
-                // Adiciona um timeout de 15 segundos à operação
                 withTimeout(15000L) { // 15000 milissegundos = 15 segundos
+
+                    // Busca o nome do criador
+                    // (Verifique se sua coleção é "users" ou "usuarios")
                     val userDoc = Firebase.firestore.collection("users").document(userId).get().await()
                     val creatorName = userDoc.getString("nome") ?: "Anônimo"
+
+                    // --- LÓGICA DO GEOCODER REMOVIDA DAQUI ---
+                    // As variáveis 'lat' e 'lng' foram removidas pois não são mais necessárias.
+                    // 'estadoAtual.latitude' e 'estadoAtual.longitude' já têm os valores.
+
                     val evento = Evento(
                         nome = estadoAtual.nome.trim(),
                         data = estadoAtual.data.trim(),
@@ -90,7 +126,10 @@ class CadastroEventoViewModel : ViewModel() {
                         categoria = estadoAtual.categoria,
                         publico = estadoAtual.publico,
                         creatorId = userId,
-                        creatorName = creatorName
+                        creatorName = creatorName,
+                        latitude = estadoAtual.latitude,  // <-- Já vem do onLocalSelected
+                        longitude = estadoAtual.longitude, // <-- Já vem do onLocalSelected
+                        participantesCount = 0 // <-- Começa com 0
                     )
 
                     println("DEBUG: [2] Objeto Evento criado. Tentando enviar para o Firestore.")
@@ -102,11 +141,9 @@ class CadastroEventoViewModel : ViewModel() {
                     _saveState.value = SaveState.Success
                 }
             } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
-                // Este bloco será executado se a operação demorar mais de 15 segundos
-                println("DEBUG: [ERRO] A operação excedeu o tempo limite (Timeout). Verifique a conexão e as regras de segurança.")
+                println("DEBUG: [ERRO] A operação excedeu o tempo limite (Timeout).")
                 _saveState.value = SaveState.Error("A conexão demorou muito para responder. Tente novamente.")
             } catch (e: Exception) {
-                // Captura qualquer outro erro que possa ocorrer
                 println("DEBUG: [ERRO] Ocorreu uma exceção: ${e.message}")
                 _saveState.value = SaveState.Error(e.message ?: "Ocorreu um erro desconhecido.")
             }
@@ -114,7 +151,8 @@ class CadastroEventoViewModel : ViewModel() {
     }
 
 
-    fun resetSaveState() {
-        _saveState.value = SaveState.Idle
-    }
+
+fun resetSaveState() {
+    _saveState.value = SaveState.Idle
+}
 }

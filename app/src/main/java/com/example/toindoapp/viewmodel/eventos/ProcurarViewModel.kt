@@ -9,6 +9,8 @@ import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -39,31 +41,46 @@ class ProcurarViewModel : ViewModel() {
     private val _eventosBrutos = MutableStateFlow<List<Evento>>(emptyList())
 
     init {
-        fetchEventos()
+        fetchEventos() // 1. Busca os dados brutos
 
-        // Combina os fluxos de dados para aplicar os filtros de forma reativa
+        // 2. Combina os dados brutos APENAS com os filtros de busca e categoria
         viewModelScope.launch {
             combine(
                 _eventosBrutos,
-                _uiState.asStateFlow()
-            ) { eventosBrutos, uiState ->
+                _uiState.asStateFlow().map { it.searchText }.distinctUntilChanged(),
+                _uiState.asStateFlow().map { it.selectedCategories }.distinctUntilChanged()
+            ) { eventosBrutos, searchText, selectedCategories ->
                 // Aplica a lógica de filtragem
                 val filteredEventos = eventosBrutos.filter { evento ->
-                    // Filtro de pesquisa (se o nome do evento contém o texto)
-                    val matchesSearch = evento.nome.contains(uiState.searchText, ignoreCase = true)
+                    // Filtro de pesquisa
+                    val matchesSearch = evento.nome.contains(searchText, ignoreCase = true)
 
                     // Filtro de categoria
-                    val matchesCategory = if (uiState.selectedCategories.contains(EventoCategoria.TODOS)) {
-                        true // Se 'TODOS' estiver selecionado, não filtra por categoria
+                    val matchesCategory = if (selectedCategories.contains(EventoCategoria.TODOS)) {
+                        true // Se 'TODOS' estiver selecionado, não filtra
                     } else {
-                        // Verifica se a categoria do evento está no conjunto de categorias selecionadas
-                        uiState.selectedCategories.contains(EventoCategoria.valueOf(evento.categoria.uppercase()))
+                        try {
+                            // Converte a string "SHOWS" (do evento) para EventoCategoria.SHOWS
+                            val categoriaDoEvento = EventoCategoria.valueOf(evento.categoria.uppercase())
+                            selectedCategories.contains(categoriaDoEvento)
+                        } catch (e: Exception) {
+                            false // Ex: Categoria no evento é "" ou "INVALIDA"
+                        }
                     }
                     matchesSearch && matchesCategory
                 }
-                uiState.copy(eventos = filteredEventos, isLoading = false)
-            }.collect { updatedState ->
-                _uiState.value = updatedState
+
+                // O 'combine' agora retorna apenas a lista filtrada
+                filteredEventos
+
+            }.collect { filteredEventos ->
+                // 3. Atualiza o uiState com a nova lista e desliga o loading
+                _uiState.update {
+                    it.copy(
+                        eventos = filteredEventos,
+                        isLoading = false
+                    )
+                }
             }
         }
     }
@@ -72,7 +89,6 @@ class ProcurarViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                // Pega todos os eventos, exceto os criados pelo usuário logado (lógica do "Explorar")
                 val userId = Firebase.auth.currentUser?.uid
                 val firestore = Firebase.firestore.collection("eventos")
 
@@ -84,9 +100,28 @@ class ProcurarViewModel : ViewModel() {
 
                 val snapshot = query.get().await()
                 val eventos = snapshot.documents.mapNotNull { document ->
-                    document.toObject(Evento::class.java)?.copy(id = document.id)
+                    // 1. Mapeamento base
+                    val eventoObj = document.toObject(Evento::class.java)
+
+                    // 2. Leitura manual de TODOS os campos que podem falhar
+                    val lat = document.getDouble("latitude") ?: 0.0
+                    val lng = document.getDouble("longitude") ?: 0.0
+                    val publico = document.getBoolean("publico") ?: true
+                    val isGratuito = document.getBoolean("isGratuito") ?: false
+                    val contagem = document.getLong("participantesCount")?.toInt() ?: 0
+
+                    // 3. Retorna a cópia com os dados corretos
+                    eventoObj?.copy(
+                        id = document.id,
+                        latitude = lat,
+                        longitude = lng,
+                        publico = publico,
+                        isGratuito = isGratuito,
+                        participantesCount = contagem
+                    )
                 }
 
+                // 4. Atualiza os dados brutos (o 'combine' no 'init' fará o resto)
                 _eventosBrutos.value = eventos
 
             } catch (e: Exception) {
@@ -97,29 +132,9 @@ class ProcurarViewModel : ViewModel() {
         }
     }
 
+
     fun onSearchTextChange(text: String) {
         _uiState.update { it.copy(searchText = text) }
     }
 
-    fun onCategorySelected(category: EventoCategoria) {
-        _uiState.update { currentState ->
-            val newCategories = when {
-                // Se a categoria 'TODOS' for selecionada, deseleciona todas as outras
-                category == EventoCategoria.TODOS -> {
-                    setOf(EventoCategoria.TODOS)
-                }
-                // Se já estiver selecionada e houver outras, deseleciona
-                currentState.selectedCategories.contains(category) -> {
-                    currentState.selectedCategories - category
-                }
-                // Se não estiver selecionada, a adiciona
-                else -> {
-                    // Deseleciona 'TODOS' se outra categoria for selecionada
-                    (currentState.selectedCategories - EventoCategoria.TODOS) + category
-                }
-            }
-            // Garante que, se nenhuma for selecionada, 'TODOS' volte a ser o padrão
-            currentState.copy(selectedCategories = if (newCategories.isEmpty()) setOf(EventoCategoria.TODOS) else newCategories)
-        }
-    }
 }

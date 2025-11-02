@@ -1,5 +1,6 @@
 package com.example.toindoapp.telas
 
+import PlacesAutocompleteTextField
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -45,6 +47,7 @@ fun CadastroEventoScreen(
     val uiState by vm.uiState.collectAsState()
     val saveState by vm.saveState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+
 
     val categorias = listOf("Esporte", "Dança", "Lazer", "Churrasco", "Estudo", "Outro")
     var expanded by remember { mutableStateOf(false) }
@@ -164,8 +167,15 @@ fun CadastroEventoScreen(
                 }
             }
 
-            item { OutlinedTextField(value = uiState.local, onValueChange = vm::onLocalChange, label = { Text("Local") }, modifier = Modifier.fillMaxWidth()) }
-
+            item {
+                PlacesAutocompleteTextField(
+                    label = "Localização",
+                    value = uiState.local.ifEmpty { "Selecione o local" },
+                    onPlaceSelected = { placeData ->
+                        vm.onLocalSelected(placeData)
+                    }
+                )
+            }
             item {
                 Column {
                     Text("Visibilidade do Evento", style = MaterialTheme.typography.bodyLarge)
@@ -224,7 +234,9 @@ fun CadastroEventoScreen(
 
                 item {
                     Button(
-                        onClick = { vm.salvarEvento() },
+                        onClick = {
+                            vm.salvarEvento() // <-- Passe o contexto aqui
+                        },
                         enabled = saveState !is SaveState.Loading,
                         modifier = Modifier.fillMaxWidth()
                     ) {
