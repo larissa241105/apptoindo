@@ -124,8 +124,10 @@ fun DetalhesEventoScreen(
                             expanded = menuAberto,
                             onDismissRequest = { menuAberto = false },
                             modifier = Modifier.width(220.dp)
+                                .background(Color.White)
                         ) {
                             DropdownMenuItem(
+                                modifier = Modifier.background(Color.White),
                                 text = { Text("Participantes", fontWeight = FontWeight.Medium, fontSize = 16.sp) },
                                 onClick = {
                                     menuAberto = false
@@ -134,8 +136,10 @@ fun DetalhesEventoScreen(
                                     if (eventoId != null && creatorId != null) {
                                         navController.navigate("participantes_screen/$eventoId/$creatorId")
                                     }
-                                }
+                                },
+
                             )
+
                         }
                     }
                 }
