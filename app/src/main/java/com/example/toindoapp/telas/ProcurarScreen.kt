@@ -72,13 +72,13 @@ fun ProcurarScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // 1. O Mapa ocupa todo o espaço no fundo
+
             GoogleMap(
                 modifier = Modifier.fillMaxSize(),
                 cameraPositionState = cameraPositionState
             ) {
                 uiState.eventos.forEach { evento ->
-                    // (Verifique se 'latitude' e 'longitude' existem na sua data class 'Evento')
+
                     val posicao = LatLng(evento.latitude, evento.longitude)
                     Marker(
                         state = MarkerState(position = posicao),

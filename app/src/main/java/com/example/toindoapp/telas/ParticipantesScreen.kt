@@ -107,7 +107,7 @@ fun HeaderDaSecao(texto: String, backgroundColor: Color = MaterialTheme.colorSch
 }}
 
 @Composable
-fun ParticipanteItem(participante: ParticipanteDisplay) { // <-- MUDE AQUI
+fun ParticipanteItem(participante: ParticipanteDisplay) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

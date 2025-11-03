@@ -159,7 +159,7 @@ fun EventoCard(evento: Evento, onClick: () -> Unit) {
                 ) {
                     if (evento.isGratuito || evento.preco == 0.0) {
                         Surface(
-                            color = Color(0xFF388E3C), // Cor verde para "GRÁTIS"
+                            color = Color(0xFF388E3C),
                             shape = RoundedCornerShape(4.dp),
                             modifier = Modifier.padding(bottom = 4.dp)
                         ) {
@@ -174,7 +174,7 @@ fun EventoCard(evento: Evento, onClick: () -> Unit) {
                     }
 
                     Surface(
-                        color = Color(0xFF673AB7), // Cor roxa para "Público" ou "Hobby"
+                        color = Color(0xFF673AB7),
                         shape = RoundedCornerShape(4.dp)
                     ) {
                         Text(

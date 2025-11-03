@@ -1,8 +1,12 @@
 package com.example.toindoapp.telas
 
 import android.R.attr.fontWeight
+import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -44,7 +48,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.launch
+import java.net.URLEncoder
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,7 +80,7 @@ fun DetalhesEventoScreen(
         when (uiState.actionState) {
             EventoActionState.DELETED -> {
                 Toast.makeText(context, "Evento excluído com sucesso!", Toast.LENGTH_SHORT).show()
-                navController.popBackStack() // Volta para a tela anterior
+                navController.popBackStack()
             }
 
             else -> {}
@@ -79,7 +91,7 @@ fun DetalhesEventoScreen(
         conviteStatus?.let { status ->
             scope.launch {
                 snackbarHostState.showSnackbar(status)
-                vm.clearConviteStatus() // Limpa o status para não mostrar novamente
+                vm.clearConviteStatus()
             }
         }
     }
@@ -231,21 +243,103 @@ fun DetalhesEventoScreen(
 
                             Spacer(modifier = Modifier.height(32.dp))
 
+                            Spacer(modifier = Modifier.height(32.dp))
 
-                            // --- INÍCIO DA SEÇÃO MODIFICADA ---
-                            // O 'if (uiState.isUserCreator)' foi substituído por este Box/when
+                            Text(
+                                text = "Localização",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 50.dp)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            val context = LocalContext.current
+                            val eventoLatLng = LatLng(evento.latitude, evento.longitude)
+
+                            val cameraPositionState = rememberCameraPositionState {
+                                position = CameraPosition.fromLatLngZoom(eventoLatLng, 15f)
+                            }
+
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp)
+                                    .padding(horizontal = 20.dp)
+                                    .clip(RoundedCornerShape(16.dp)),
+
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+
+                                Box(modifier = Modifier.fillMaxSize()) {
+
+                                    GoogleMap(
+                                        modifier = Modifier.fillMaxSize(),
+                                        cameraPositionState = cameraPositionState,
+                                        uiSettings = MapUiSettings(
+                                            zoomControlsEnabled = false,
+                                            mapToolbarEnabled = false,
+                                            scrollGesturesEnabled = false,
+                                            zoomGesturesEnabled = false,
+                                            tiltGesturesEnabled = false,
+                                            rotationGesturesEnabled = false
+                                        )
+                                    ) {
+                                        Marker(
+                                            state = MarkerState(position = eventoLatLng),
+                                            title = evento.nome,
+                                            snippet = evento.local
+                                        )
+                                    }
+
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(Color.Transparent)
+                                            .clickable {
+
+                                                val lat = evento.latitude
+                                                val lng = evento.longitude
+
+                                                val label = URLEncoder.encode(evento.local, "UTF-8")
+
+                                                val gmmIntentUri = Uri.parse("geo:$lat,$lng?q=$lat,$lng($label)")
+                                                val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+                                                mapIntent.setPackage("com.google.android.apps.maps")
+
+                                                try {
+                                                    context.startActivity(mapIntent)
+                                                } catch (e: ActivityNotFoundException) {
+
+                                                    try {
+                                                        val fallbackIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+                                                        context.startActivity(fallbackIntent)
+                                                    } catch (e2: Exception) {
+
+                                                        Toast.makeText(context, "Não foi possível encontrar um app de mapas.", Toast.LENGTH_SHORT).show()
+                                                    }
+                                                }
+                                            }
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(32.dp))
+
+
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 16.dp), // Padding padrão
+                                    .padding(horizontal = 16.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 when {
-                                    // Caso 1: O usuário é o CRIADOR do evento
+
                                     uiState.isUserCreator -> {
                                         Column(
                                             modifier = Modifier
-                                                .fillMaxWidth(), // Não precisa de padding horizontal aqui, pois o Box já tem
+                                                .fillMaxWidth(),
                                             verticalArrangement = Arrangement.spacedBy(8.dp),
                                             horizontalAlignment = Alignment.CenterHorizontally
                                         ) {
@@ -300,26 +394,25 @@ fun DetalhesEventoScreen(
                                         }
                                     }
 
-                                    // Caso 2: O evento é PÚBLICO (e o usuário não é o criador)
-                                    // Lembre-se que confirmamos que o nome do campo é 'publico'
+
                                     uiState.evento?.publico == true -> {
                                         Button(
                                             onClick = { vm.participarEvento() },
                                             modifier = Modifier.fillMaxWidth().height(52.dp),
                                             shape = RoundedCornerShape(12.dp),
-                                            // Desabilita o botão se já estiver participando ou carregando
+
                                             enabled = !uiState.isUserParticipating && !uiState.isJoiningEvent
                                         ) {
                                             when {
-                                                // Carregando...
+
                                                 uiState.isJoiningEvent -> {
                                                     CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
                                                 }
-                                                // Já participa
+
                                                 uiState.isUserParticipating -> {
                                                     Text("Você está participando!", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                                                 }
-                                                // Pode participar
+
                                                 else -> {
                                                     Text("Participar do Evento", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                                                 }
@@ -327,7 +420,7 @@ fun DetalhesEventoScreen(
                                         }
                                     }
 
-                                    // Caso 3: O evento é PRIVADO (e o usuário não é o criador)
+
                                     else -> {
                                         Text(
                                             "Este é um evento privado. Você só pode participar se for convidado pelo criador.",
@@ -341,7 +434,7 @@ fun DetalhesEventoScreen(
                             }
 
 
-                            Spacer(modifier = Modifier.height(16.dp)) // Espaço no final da rolagem
+                            Spacer(modifier = Modifier.height(16.dp))
 
 
                         }
@@ -354,7 +447,6 @@ fun DetalhesEventoScreen(
 
 
 
-//adicionando os cards de design
 @Composable
 fun DetalheInfoCard(
     modifier: Modifier = Modifier,
@@ -363,7 +455,7 @@ fun DetalheInfoCard(
     valor: String
 ) {
     Card(
-        modifier = modifier.height(110.dp),
+        modifier = modifier.height(150.dp),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
