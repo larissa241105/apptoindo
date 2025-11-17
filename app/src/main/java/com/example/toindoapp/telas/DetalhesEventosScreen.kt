@@ -138,7 +138,7 @@ fun DetalhesEventoScreen(
                                     }
                                 },
 
-                            )
+                                )
 
                         }
                     }
@@ -400,12 +400,31 @@ fun DetalhesEventoScreen(
 
 
                                     uiState.evento?.publico == true -> {
+
+                                        val isLoading = uiState.isJoiningEvent || uiState.isLeavingEvent
+
+                                        val buttonColors = if (uiState.isUserParticipating) {
+                                            ButtonDefaults.buttonColors(
+                                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                            )
+                                        } else {
+                                            ButtonDefaults.buttonColors()
+                                        }
+
                                         Button(
-                                            onClick = { vm.participarEvento() },
+                                            // 3. onClick CORRIGIDO
+                                            onClick = {
+                                                if (uiState.isUserParticipating) {
+                                                    vm.cancelarParticipacao()
+                                                } else {
+                                                    vm.participarEvento()
+                                                }
+                                            },
                                             modifier = Modifier.fillMaxWidth().height(52.dp),
                                             shape = RoundedCornerShape(12.dp),
-
-                                            enabled = !uiState.isUserParticipating && !uiState.isJoiningEvent
+                                            colors = buttonColors,
+                                            enabled = !isLoading
                                         ) {
                                             when {
 
@@ -413,8 +432,12 @@ fun DetalhesEventoScreen(
                                                     CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
                                                 }
 
+                                                uiState.isLeavingEvent -> {
+                                                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onSecondaryContainer, strokeWidth = 2.dp)
+                                                }
+
                                                 uiState.isUserParticipating -> {
-                                                    Text("Você está participando!", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                                                    Text("Cancelar Participação", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                                                 }
 
                                                 else -> {
@@ -430,12 +453,14 @@ fun DetalhesEventoScreen(
                                             "Este é um evento privado. Você só pode participar se for convidado pelo criador.",
                                             style = MaterialTheme.typography.bodyMedium,
                                             textAlign = TextAlign.Center,
-                                            color = Color.Gray,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             modifier = Modifier.padding(horizontal = 16.dp)
                                         )
                                     }
                                 }
                             }
+
+
 
 
                             Spacer(modifier = Modifier.height(16.dp))

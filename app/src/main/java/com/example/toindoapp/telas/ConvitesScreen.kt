@@ -80,7 +80,10 @@ fun ItemConvite(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.cardColors(
+                containerColor = Color.White
+                )
     ) {
         Column(
             modifier = Modifier.padding(16.dp)

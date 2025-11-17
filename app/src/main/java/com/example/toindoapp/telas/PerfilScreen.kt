@@ -1,11 +1,14 @@
-package com.example.toindoapp.telas // Ajuste o pacote se necessário
+package com.example.toindoapp.telas
 
-import androidx.compose.foundation.background
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -16,22 +19,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.rememberVectorPainter // <<< 1. IMPORTE AQUI
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import com.example.toindoapp.R
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
-import com.bumptech.glide.integration.compose.GlideImage
-import com.example.toindoapp.navigation.Screen // Importe sua classe Screen
+import com.example.toindoapp.navigation.Screen
 import com.example.toindoapp.viewmodel.perfil.PerfilViewModel
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PerfilScreen(
     navController: NavController,
@@ -39,6 +38,9 @@ fun PerfilScreen(
 ) {
     val uiState by vm.uiState.collectAsState()
     val logoutSuccess by vm.logoutSuccess.collectAsState()
+
+    val clipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
 
     LaunchedEffect(logoutSuccess) {
         if (logoutSuccess) {
@@ -49,7 +51,7 @@ fun PerfilScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFFFffff),
+        containerColor = Color.White,
         topBar = {
             TopAppBar(
                 title = { Text("Meu Perfil") },
@@ -57,74 +59,111 @@ fun PerfilScreen(
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar")
                     }
-                },colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFFFFFF)
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             )
+        },
+        bottomBar = {
+            BottomMenu(navController = navController)
         }
     ) { innerPadding ->
         if (uiState.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentAlignment = Alignment.Center
+            ) {
                 CircularProgressIndicator()
             }
         } else {
             Column(
                 modifier = Modifier
                     .padding(innerPadding)
-                    .padding(16.dp)
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-
-                val placeholderPainter = rememberVectorPainter(image = Icons.Default.AccountCircle)
 
 
                 Box(
-
                     modifier = Modifier
-                        .size(72.dp)
-                        .background(
-                            color = Color.LightGray,
-                            shape = CircleShape
-                        ),
+                        .size(90.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Person,
                         contentDescription = "Ícone do Perfil",
-
                         modifier = Modifier.size(48.dp),
-                        tint = Color.White
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
 
-                Text(
-                    text = uiState.nome,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color =MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = uiState.nome,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = uiState.email,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
 
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Seu ID de Usuário (UID)",
+                        style = MaterialTheme.typography.titleMedium
+                    )
 
-                Text(
-                    text = uiState.email,
-                    fontSize = 16.sp,
-                    color =MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                    OutlinedCard(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = uiState.userUid,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f)
+                            )
 
-                //ADICIONADO: mostrar e copiar uid
+                            IconButton(onClick = {
+                                clipboardManager.setText(AnnotatedString(uiState.userUid))
+                                Toast.makeText(context, "UID copiado!", Toast.LENGTH_SHORT).show()
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.ContentCopy,
+                                    contentDescription = "Copiar UID",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+                }
 
-                Text(
-                    text = uiState.userUid,
-                    fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                CopyButtonExample(textToCopy = uiState.userUid )
-
-
-                Spacer(modifier = Modifier.weight(1f))
 
                 Button(
                     onClick = { vm.logout() },
@@ -134,22 +173,6 @@ fun PerfilScreen(
                     Text("SAIR (LOGOUT)")
                 }
             }
-        }
-    }
-}
-
-//butao para copiar uid
-@Composable
-private fun CopyButtonExample(textToCopy: String) {
-    val clipboardManager = LocalClipboardManager.current
-
-    Column {
-        Button(
-            onClick = {
-                clipboardManager.setText(AnnotatedString(textToCopy))
-            }
-        ) {
-            Text("Clique aqui para copiar seu UID")
         }
     }
 }

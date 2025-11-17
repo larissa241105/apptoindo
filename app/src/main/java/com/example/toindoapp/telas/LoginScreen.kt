@@ -45,7 +45,7 @@ fun LoginScreen(
     onGoogleClick:()->Unit={},
     onSignupClick:()->Unit={},
 ){
-    val emailColor = Color(0xfffDF4A1B)
+    val emailColor = Color(0xffDF4A1B)
     val googleColor = Color(0xff9C27b0)
 
     Box(

@@ -46,12 +46,12 @@ class EventosViewModel : ViewModel() {
 
                 val finalQuery = when (currentTab) {
                     EventosTab.EXPLORAR -> {
+                        val exploreQuery = firestore.whereEqualTo("publico", true)
+
                         if (userId != null) {
-
-                            firestore.whereNotEqualTo("creatorId", userId)
+                            exploreQuery.whereNotEqualTo("creatorId", userId)
                         } else {
-
-                            firestore
+                            exploreQuery
                         }
                     }
                     EventosTab.MEUS_EVENTOS -> {

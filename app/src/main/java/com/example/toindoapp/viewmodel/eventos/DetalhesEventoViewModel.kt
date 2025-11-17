@@ -25,6 +25,7 @@ data class DetalhesEventoUiState(
     val error: String? = null,
     val actionState: EventoActionState = EventoActionState.IDLE,
     val isUserParticipating: Boolean = false,
+    val isLeavingEvent: Boolean = false,
     val isJoiningEvent: Boolean = false
 )
 
@@ -38,6 +39,9 @@ data class Convite(
 
 
 class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
+
+    private val auth = Firebase.auth
+    private val db = Firebase.firestore
 
     private val _uiState = MutableStateFlow(DetalhesEventoUiState())
     val uiState = _uiState.asStateFlow()
@@ -234,6 +238,84 @@ class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
     }
 
 
+
+    fun cancelarParticipacao() {
+        // 0. Prevenção de clique duplo
+        if (_uiState.value.isLeavingEvent) return
+
+        val userId = Firebase.auth.currentUser?.uid
+        val evento = _uiState.value.evento
+
+        if (userId == null || evento == null) {
+            _uiState.update { it.copy(error = "Erro: Usuário ou evento não encontrado.") }
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLeavingEvent = true) } // 1. Mostra loading
+            try {
+                val convitesRef = Firebase.firestore.collection("convites")
+                val eventoRef = Firebase.firestore.collection("eventos").document(evento.id)
+
+                // 2. Encontra o convite existente para este usuário e evento
+                val query = convitesRef
+                    .whereEqualTo("eventoId", evento.id)
+                    .whereEqualTo("convidadoUid", userId)
+                    .limit(1)
+                    .get()
+                    .await()
+
+                // Se o convite não for encontrado, algo está fora de sincronia.
+                if (query.isEmpty) {
+                    // A UI acha que está participando, mas o DB diz que não.
+                    // Apenas corrigimos a UI e saímos.
+                    _uiState.update { it.copy(isLeavingEvent = false, isUserParticipating = false) }
+                    return@launch
+                }
+
+                val doc = query.documents.first()
+                val docId = doc.id
+                val statusAtual = doc.getString("status")
+
+                // 3. Verifica se o usuário estava realmente "ACEITO"
+                if (statusAtual == "ACEITO") {
+                    // 3.A. Atualiza o status do convite para "RECUSADO"
+                    convitesRef.document(docId).update("status", "RECUSADO").await()
+
+                    // 3.B. Decrementa a contagem no evento
+                    eventoRef.update("participantesCount", FieldValue.increment(-1)).await()
+
+                } else {
+                    // O status era "PENDENTE" ou já "RECUSADO".
+                    // A UI estava dessincronizada, mas não precisamos decrementar a contagem.
+                    // Apenas garantimos que o status seja "RECUSADO".
+                    if (statusAtual != "RECUSADO") {
+                        convitesRef.document(docId).update("status", "RECUSADO").await()
+                    }
+                }
+
+                // 4. Atualiza a UI após o sucesso
+                _uiState.update {
+                    it.copy(
+                        isLeavingEvent = false,
+                        isUserParticipating = false // Agora não está mais participando
+                    )
+                }
+
+            } catch (e: Exception) {
+                // 5. Se der erro, não muda o estado 'isUserParticipating'
+                _uiState.update {
+                    it.copy(
+                        isLeavingEvent = false,
+                        error = "Falha ao cancelar: ${e.message}"
+                    )
+                }
+            }
+        }
+    }
+
+
+
     fun clearConviteStatus() {
         _conviteStatus.value = null
     }
@@ -262,3 +344,5 @@ class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
         }
     }
 }
+
+

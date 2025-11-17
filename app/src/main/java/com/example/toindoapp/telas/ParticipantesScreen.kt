@@ -40,7 +40,7 @@ fun ParticipantesScreen(navController: NavController, eventoId: String, creatorI
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White, 
+                    containerColor = Color.White,
                     titleContentColor = Color.Black
                 )
             )
