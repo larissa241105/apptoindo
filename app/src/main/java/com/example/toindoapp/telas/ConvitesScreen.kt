@@ -28,6 +28,7 @@ fun ConvitesScreen(
 
     val listaDeConvites = vm.convites.value
 
+
     Scaffold(
         containerColor = Color(0xFFFFFFFF),
         topBar = {
@@ -78,6 +79,7 @@ fun ItemConvite(
     onAceitarClick: () -> Unit,
     onRecusarClick: () -> Unit
 ) {
+    val VerdeEscuro = Color(0xFF006400)
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -104,13 +106,27 @@ fun ItemConvite(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                OutlinedButton(
+                Button(
                     onClick = onRecusarClick,
-                    modifier = Modifier.padding(end = 8.dp)
+                    modifier = Modifier.padding(end = 8.dp),
+                    // Define a cor de fundo para vermelho
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Red, // Cor de fundo
+                        contentColor = Color.White // Cor do texto para contraste
+                    )
                 ) {
                     Text("Recusar")
                 }
-                Button(onClick = onAceitarClick) {
+
+                // 2. Botão "Aceitar" em VERDE (Sólido)
+                Button(
+                    onClick = onAceitarClick,
+                    // Define a cor de fundo para verde
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = VerdeEscuro, // A cor verde escura
+                        contentColor = Color.White // Cor do texto para contraste
+                    )
+                ) {
                     Text("Aceitar")
                 }
             }
