@@ -20,6 +20,10 @@ data class BottomNavItem(
 
 @Composable
 fun BottomMenu(navController: NavController) {
+    val PrimaryOrange = Color(0xffDF4A1B) // Laranja (Seu 0xffDF4A1B)
+    val PrimaryPurple = Color(0xff9C27b0) // Roxo (Seu 0xff9C27b0)
+    val UnselectedGray = Color(0xFF757575) // Um cinza padrão para itens inativos
+
     val navItems = listOf(
         BottomNavItem("Evento", Screen.Eventos.route, R.drawable.ic_celebration_filled, R.drawable.ic_celebration_outlined),
         BottomNavItem("Procurar", Screen.Procurar.route, R.drawable.ic_search_filled, R.drawable.ic_search_outlined),
@@ -57,11 +61,20 @@ fun BottomMenu(navController: NavController) {
                 // Também trocamos as cores fixas por cores do tema para garantir
                 // que o texto e os ícones fiquem legíveis em ambos os modos.
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    selectedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    indicatorColor = MaterialTheme.colorScheme.secondaryContainer
+                    // 1. Cor do Ícone do Item SELECIONADO (Roxo para destaque principal)
+                    selectedIconColor = PrimaryOrange,
+
+                    // 2. Cor do Texto do Item SELECIONADO (Roxo ou Preto para leitura fácil)
+                    selectedTextColor = PrimaryOrange,
+
+                    // 3. Cor do Ícone do Item NÃO SELECIONADO (Cinza para indicar inatividade)
+                    unselectedIconColor = UnselectedGray,
+
+                    // 4. Cor do Texto do Item NÃO SELECIONADO (Cinza)
+                    unselectedTextColor = UnselectedGray,
+
+                    // 5. Cor do Indicador de Seleção (Laranja, para um destaque vibrante sob o ícone/texto)
+                    indicatorColor = PrimaryPurple.copy(alpha = 0.0f) // Usando Laranja, mas mais suave
                 )
             )
         }

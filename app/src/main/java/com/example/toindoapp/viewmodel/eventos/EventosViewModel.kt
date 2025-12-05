@@ -100,6 +100,10 @@ class EventosViewModel : ViewModel() {
     }
 
 
+    fun carregarEventos() {
+        fetchEventosForSelectedTab()
+    }
+
     fun onTabSelected(tab: EventosTab) {
 
         _uiState.update { it.copy(selectedTab = tab) }
