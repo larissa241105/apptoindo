@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.AttachMoney
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Group
@@ -42,22 +43,38 @@ fun EventosScreen(
     vm: EventosViewModel = viewModel()
 ) {
     val uiState by vm.uiState.collectAsState()
+    val PrimaryOrange = Color(0xffDF4A1B)
 
     Scaffold(
-        containerColor = Color(0xFFFFFFF),
+        containerColor = Color(0xFFFFFFFF),
         topBar = {
             TopAppBar(
                 title = { Text("Eventos") },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFFFFFF)
-                )
+                    containerColor = Color(0xFFFFFFFF)
+                ),
+                actions = {
+                    IconButton(onClick = {
+                        vm.carregarEventos()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Atualizar eventos",
+                            tint = PrimaryOrange
+                        )
+                    }
+                }
             )
         },
+
+
+
+
         bottomBar = { BottomMenu(navController = navController) },
 
         floatingActionButton = {
             FloatingActionButton(onClick = { navController.navigate(Screen.CadastroEvento.route) },
-                    containerColor = Color(0xfffDF4A1B)
+                containerColor = Color(0xfffDF4A1B)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Adicionar Evento",
                     tint = Color.White
@@ -80,7 +97,7 @@ fun EventosScreen(
                         onClick = { vm.onTabSelected(tab) },
                         text = { Text(tab.title) },
 
-                    )
+                        )
                 }
             }
 

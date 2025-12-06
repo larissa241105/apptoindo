@@ -154,7 +154,7 @@ fun SignInScreen(
                 TextButton(
                     onClick = { showPassword = !showPassword },
                     colors = ButtonDefaults.textButtonColors(
-                        contentColor = Gray // Ou qualquer outra cor que você queira
+                        contentColor = Gray
                     )
                 ) {
                     Text(if (showPassword) "Hide" else "Show")

@@ -52,7 +52,7 @@ fun ProcurarScreen(
 ) {
     val uiState by vm.uiState.collectAsState()
 
-    val localizacaoInicial = LatLng(-3.1190, -60.0217) // Manaus
+    val localizacaoInicial = LatLng(-3.1190, -60.0217)
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(localizacaoInicial, 12f)
     }
@@ -207,7 +207,7 @@ fun EventoInfoCard(
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "${evento.data} - ${evento.horario}", // Use suas variáveis
+                        text = "${evento.data} - ${evento.horario}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,

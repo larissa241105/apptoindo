@@ -235,7 +235,7 @@ fun CadastroEventoScreen(
                 item {
                     Button(
                         onClick = {
-                            vm.salvarEvento() // <-- Passe o contexto aqui
+                            vm.salvarEvento()
                         },
                         enabled = saveState !is SaveState.Loading,
                         modifier = Modifier.fillMaxWidth()

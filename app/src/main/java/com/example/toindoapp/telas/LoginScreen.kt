@@ -104,7 +104,6 @@ fun LoginScreen(
         val annotatedText = buildAnnotatedString {
             append("Novo usuário?")
 
-            // Anote o texto "Cadastre-se" para que seja clicável
             pushStringAnnotation(tag = "signup", annotation = "signup_link")
             withStyle(style = SpanStyle(
                 color = Color(0xffff6a2e),

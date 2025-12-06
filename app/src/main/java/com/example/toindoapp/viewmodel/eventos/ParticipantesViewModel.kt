@@ -15,9 +15,9 @@ import kotlinx.coroutines.flow.update
 // Seu data class ParticipantesUiState atualizado
 data class ParticipantesUiState(
     val isLoading: Boolean = true,
-    val confirmados: List<ParticipanteDisplay> = emptyList(), // <-- MUDOU AQUI
-    val pendentes: List<ParticipanteDisplay> = emptyList(),  // <-- MUDOU AQUI
-    val recusados: List<ParticipanteDisplay> = emptyList(),  // <-- MUDOU AQUI (se você for usá-la)
+    val confirmados: List<ParticipanteDisplay> = emptyList(),
+    val pendentes: List<ParticipanteDisplay> = emptyList(),
+    val recusados: List<ParticipanteDisplay> = emptyList(),
     val error: String? = null,
     val isUserCreator: Boolean = false,
 )
@@ -27,7 +27,7 @@ data class ParticipanteDisplay(
     val userId: String = "",
     val nome: String = "Carregando...",
     val status: String = "",
-    // Você pode adicionar mais campos aqui, como fotoUrl, etc.
+
 )
 
 class ParticipantesViewModel(private val eventoId: String, private val creatorId: String) : ViewModel() {
@@ -68,11 +68,8 @@ class ParticipantesViewModel(private val eventoId: String, private val creatorId
                 return@addSnapshotListener
             }
 
-            // 1. Pega todos os convites
-            // !!! Assumindo que sua classe 'Convite' tem os campos 'convidadoId' e 'status'
             val todosOsConvites = snapshot.toObjects(Convite::class.java)
 
-            // 2. Extrai todos os IDs de usuários únicos
             val userIds = todosOsConvites.map { it.convidadoUid }.distinct()
 
             if (userIds.isEmpty()) {
@@ -80,21 +77,16 @@ class ParticipantesViewModel(private val eventoId: String, private val creatorId
                 return@addSnapshotListener
             }
 
-            // 3. Busca os dados desses usuários
-            // !!! Assumindo que sua coleção de usuários se chama "users"
             FirebaseFirestore.getInstance().collection("users")
                 .whereIn(FieldPath.documentId(), userIds)
                 .get()
                 .addOnSuccessListener { userSnapshot ->
 
-                    // 4. Cria um mapa de (UserId -> Nome) para consulta rápida
-                    // !!! Assumindo que o campo do nome no seu documento de usuário é "nome"
                     val userMap = userSnapshot.documents.associateBy(
                         { it.id }, // Chave: ID do usuário
                         { it.getString("nome") ?: "Nome Desconhecido" } // Valor: Nome
                     )
 
-                    // 5. Combina os dados do convite com os dados do usuário
                     val participantesDisplayList = todosOsConvites.map { convite ->
                         ParticipanteDisplay(
                             userId = convite.convidadoUid,
@@ -103,7 +95,6 @@ class ParticipantesViewModel(private val eventoId: String, private val creatorId
                         )
                     }
 
-                    // 6. Agrupa pela lista combinada e atualiza o UiState
                     val agrupadosPorStatus = participantesDisplayList.groupBy { it.status }
 
                     _uiState.update {

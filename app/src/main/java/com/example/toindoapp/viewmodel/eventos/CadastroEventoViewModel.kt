@@ -20,7 +20,7 @@ import java.util.Locale
 
 data class PlaceData(
     val address: String,
-    val latLng: com.google.android.gms.maps.model.LatLng // Verifique esta importação!
+    val latLng: com.google.android.gms.maps.model.LatLng
 )
 
 data class CadastroEventoUiState(
@@ -38,7 +38,7 @@ data class CadastroEventoUiState(
     val longitude: Double = 0.0,
 )
 
-// Estado do processo de salvamento (sem alterações)
+
 sealed interface SaveState {
     object Idle : SaveState
     object Loading : SaveState
@@ -54,16 +54,15 @@ class CadastroEventoViewModel : ViewModel() {
     private val _saveState = MutableStateFlow<SaveState>(SaveState.Idle)
     val saveState = _saveState.asStateFlow()
 
-    // Funções de update dos campos (sem alterações)
     fun onNomeChange(novoNome: String) { _uiState.update { it.copy(nome = novoNome) } }
     fun onDataChange(novaData: String) { _uiState.update { it.copy(data = novaData) } }
     fun onHorarioChange(novoHorario: String) { _uiState.update { it.copy(horario = novoHorario) } }
 
-    // Esta função é chamada pelo Autocomplete
+
     fun onLocalSelected(placeData: PlaceData) {
         _uiState.update {
             it.copy(
-                local = placeData.address, // Salva o nome/endereço
+                local = placeData.address,
                 latitude = placeData.latLng.latitude,
                 longitude = placeData.latLng.longitude
             )
@@ -104,16 +103,11 @@ class CadastroEventoViewModel : ViewModel() {
             _saveState.value = SaveState.Loading
 
             try {
-                withTimeout(15000L) { // 15000 milissegundos = 15 segundos
+                withTimeout(15000L) {
 
-                    // Busca o nome do criador
-                    // (Verifique se sua coleção é "users" ou "usuarios")
                     val userDoc = Firebase.firestore.collection("users").document(userId).get().await()
                     val creatorName = userDoc.getString("nome") ?: "Anônimo"
 
-                    // --- LÓGICA DO GEOCODER REMOVIDA DAQUI ---
-                    // As variáveis 'lat' e 'lng' foram removidas pois não são mais necessárias.
-                    // 'estadoAtual.latitude' e 'estadoAtual.longitude' já têm os valores.
 
                     val evento = Evento(
                         nome = estadoAtual.nome.trim(),
@@ -127,9 +121,9 @@ class CadastroEventoViewModel : ViewModel() {
                         publico = estadoAtual.publico,
                         creatorId = userId,
                         creatorName = creatorName,
-                        latitude = estadoAtual.latitude,  // <-- Já vem do onLocalSelected
-                        longitude = estadoAtual.longitude, // <-- Já vem do onLocalSelected
-                        participantesCount = 0 // <-- Começa com 0
+                        latitude = estadoAtual.latitude,
+                        longitude = estadoAtual.longitude,
+                        participantesCount = 0
                     )
 
                     println("DEBUG: [2] Objeto Evento criado. Tentando enviar para o Firestore.")

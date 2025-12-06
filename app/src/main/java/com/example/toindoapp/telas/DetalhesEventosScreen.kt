@@ -413,7 +413,6 @@ fun DetalhesEventoScreen(
                                         }
 
                                         Button(
-                                            // 3. onClick CORRIGIDO
                                             onClick = {
                                                 if (uiState.isUserParticipating) {
                                                     vm.cancelarParticipacao()
@@ -525,7 +524,6 @@ fun DetalheInfoCard(
     }
 }
 
-// o clip das categorias do evento
 @Composable
 fun CategoryChip(
     category: String

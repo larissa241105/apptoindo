@@ -83,7 +83,7 @@ class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
                     val conviteQuery = Firebase.firestore.collection("convites")
                         .whereEqualTo("eventoId", eventoId)
                         .whereEqualTo("convidadoUid", userId)
-                        .whereEqualTo("status", "ACEITO") // <-- Só conta se estiver ACEITO
+                        .whereEqualTo("status", "ACEITO")
                         .limit(1)
                         .get()
                         .await()
@@ -94,7 +94,7 @@ class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
                     id = document.id,
                     publico = publicoFromFirebase,
                     isGratuito = isGratuitoFromFirebase,
-                    participantesCount = contagem // <-- Adicione a contagem
+                    participantesCount = contagem
                 )
 
 
@@ -105,7 +105,7 @@ class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
                         isLoading = false,
                         evento = eventoFinal,
                         isUserCreator = isCreator,
-                        isUserParticipating = isParticipando // <-- Define o estado do botão
+                        isUserParticipating = isParticipando
                     )
                 }
 
@@ -180,7 +180,6 @@ class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
                 val convitesRef = Firebase.firestore.collection("convites")
                 val eventoRef = Firebase.firestore.collection("eventos").document(evento.id)
 
-                // 1. Verifica se já existe um convite (PENDENTE ou RECUSADO)
                 val query = convitesRef
                     .whereEqualTo("eventoId", evento.id)
                     .whereEqualTo("convidadoUid", userId)
@@ -191,10 +190,9 @@ class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
                 var jaEstavaAceito = false
 
                 if (query.isEmpty) {
-                    // 2.A. Não existe convite. Cria um novo já como "ACEITO".
                     val novoConvite = Convite(
                         nomeDoEvento = evento.nome,
-                        quemConvidou = "Participação Pública", // ou "self"
+                        quemConvidou = "Participação Pública",
                         convidadoUid = userId,
                         eventoId = evento.id,
                         status = "ACEITO"
@@ -202,18 +200,17 @@ class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
                     convitesRef.add(novoConvite).await()
 
                 } else {
-                    // 2.B. Já existe um convite. Apenas atualiza o status.
+
                     val docId = query.documents.first().id
                     val statusAtual = query.documents.first().getString("status")
 
                     if (statusAtual == "ACEITO") {
-                        jaEstavaAceito = true // Já participava, não incrementa a contagem
+                        jaEstavaAceito = true
                     } else {
                         convitesRef.document(docId).update("status", "ACEITO").await()
                     }
                 }
 
-                // 3. Incrementa a contagem no evento (APENAS se não estava aceito antes)
                 if (!jaEstavaAceito) {
                     eventoRef.update("participantesCount", FieldValue.increment(1)).await()
                 }
@@ -222,8 +219,7 @@ class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
                 _uiState.update {
                     it.copy(
                         isJoiningEvent = false,
-                        isUserParticipating = true // Agora está participando
-                    )
+                        isUserParticipating = true)
                 }
 
             } catch (e: Exception) {
@@ -257,7 +253,7 @@ class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
                 val convitesRef = Firebase.firestore.collection("convites")
                 val eventoRef = Firebase.firestore.collection("eventos").document(evento.id)
 
-                // 2. Encontra o convite existente para este usuário e evento
+
                 val query = convitesRef
                     .whereEqualTo("eventoId", evento.id)
                     .whereEqualTo("convidadoUid", userId)
@@ -265,10 +261,8 @@ class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
                     .get()
                     .await()
 
-                // Se o convite não for encontrado, algo está fora de sincronia.
                 if (query.isEmpty) {
-                    // A UI acha que está participando, mas o DB diz que não.
-                    // Apenas corrigimos a UI e saímos.
+
                     _uiState.update { it.copy(isLeavingEvent = false, isUserParticipating = false) }
                     return@launch
                 }
@@ -277,33 +271,27 @@ class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
                 val docId = doc.id
                 val statusAtual = doc.getString("status")
 
-                // 3. Verifica se o usuário estava realmente "ACEITO"
                 if (statusAtual == "ACEITO") {
-                    // 3.A. Atualiza o status do convite para "RECUSADO"
+
                     convitesRef.document(docId).update("status", "RECUSADO").await()
 
-                    // 3.B. Decrementa a contagem no evento
                     eventoRef.update("participantesCount", FieldValue.increment(-1)).await()
 
                 } else {
-                    // O status era "PENDENTE" ou já "RECUSADO".
-                    // A UI estava dessincronizada, mas não precisamos decrementar a contagem.
-                    // Apenas garantimos que o status seja "RECUSADO".
+
                     if (statusAtual != "RECUSADO") {
                         convitesRef.document(docId).update("status", "RECUSADO").await()
                     }
                 }
 
-                // 4. Atualiza a UI após o sucesso
                 _uiState.update {
                     it.copy(
                         isLeavingEvent = false,
-                        isUserParticipating = false // Agora não está mais participando
+                        isUserParticipating = false
                     )
                 }
 
             } catch (e: Exception) {
-                // 5. Se der erro, não muda o estado 'isUserParticipating'
                 _uiState.update {
                     it.copy(
                         isLeavingEvent = false,
@@ -323,7 +311,7 @@ class DetalhesEventoViewModel(private val eventoId: String) : ViewModel() {
 
     fun deleteEvento() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) } // re-usando o isLoading geral
+            _uiState.update { it.copy(isLoading = true) }
             try {
                 Firebase.firestore.collection("eventos").document(eventoId).delete().await()
                 _uiState.update { it.copy(actionState = EventoActionState.DELETED, isLoading = false) }
