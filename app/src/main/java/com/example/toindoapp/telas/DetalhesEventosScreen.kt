@@ -404,9 +404,10 @@ fun DetalhesEventoScreen(
                                         val isLoading = uiState.isJoiningEvent || uiState.isLeavingEvent
 
                                         val buttonColors = if (uiState.isUserParticipating) {
+
                                             ButtonDefaults.buttonColors(
-                                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                                containerColor = Color.Red,
+                                                contentColor = Color.White
                                             )
                                         } else {
                                             ButtonDefaults.buttonColors()
@@ -432,7 +433,7 @@ fun DetalhesEventoScreen(
                                                 }
 
                                                 uiState.isLeavingEvent -> {
-                                                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onSecondaryContainer, strokeWidth = 2.dp)
+                                                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.error, strokeWidth = 2.dp)
                                                 }
 
                                                 uiState.isUserParticipating -> {
